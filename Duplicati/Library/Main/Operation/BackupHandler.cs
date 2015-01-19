@@ -596,6 +596,10 @@ namespace Duplicati.Library.Main.Operation
                                         m_database.UpdateRemoteVolume(m_blockvolume.RemoteFilename, RemoteVolumeState.Uploading, -1, null, m_transaction);
                                         m_blockvolume.Close();
                                         UpdateIndexVolume();
+                                     
+                                    	using(new Logging.Timer("CommitUpdateRemoteVolume"))
+                                        m_transaction.Commit();
+                                     	m_transaction = m_database.BeginTransaction();
 
                                         m_backend.Put(m_blockvolume, m_indexvolume);
 
@@ -609,12 +613,25 @@ namespace Duplicati.Library.Main.Operation
                                 }
                                 else
                                 {
+
+                                    using(new Logging.Timer("CommitUpdateRemoteVolume"))
+                                        m_transaction.Commit();
+                                    m_transaction = m_database.BeginTransaction();
+
+
+                                    using(new Logging.Timer("CommitUpdateRemoteVolume"))
+                                        m_transaction.Commit();
+                                    m_transaction = m_database.BeginTransaction();
+
                                     m_database.RemoveRemoteVolume(m_blockvolume.RemoteFilename, m_transaction);
                                     if (m_indexvolume != null)
                                         m_database.RemoveRemoteVolume(m_indexvolume.RemoteFilename, m_transaction);
                                 }
                             }
 
+                            using(new Logging.Timer("CommitUpdateRemoteVolume"))
+                                m_transaction.Commit();
+                            m_transaction = m_database.BeginTransaction();
                             using (new Logging.Timer("UpdateChangeStatistics"))
                                 m_database.UpdateChangeStatistics(m_result);
                             using (new Logging.Timer("VerifyConsistency"))
@@ -643,6 +660,11 @@ namespace Duplicati.Library.Main.Operation
                                     else
                                     {
                                         m_database.UpdateRemoteVolume(m_filesetvolume.RemoteFilename, RemoteVolumeState.Uploading, -1, null, m_transaction);
+
+                                        using (new Logging.Timer("CommitUpdateRemoteVolume"))
+                                            m_transaction.Commit();
+                                        m_transaction = m_database.BeginTransaction();
+
                                         m_backend.Put(m_filesetvolume);
 
                                         using (new Logging.Timer("CommitUpdateRemoteVolume"))
@@ -666,6 +688,11 @@ namespace Duplicati.Library.Main.Operation
                             {
                                 if (m_options.KeepTime.Ticks > 0 || m_options.KeepVersions != 0)
                                 {
+
+                                    using(new Logging.Timer("CommitUpdateRemoteVolume"))
+                                        m_transaction.Commit();
+                                    m_transaction = m_database.BeginTransaction();
+
                                     m_result.OperationProgressUpdater.UpdatePhase(OperationPhase.Backup_Delete);
                                     m_result.DeleteResults = new DeleteResults(m_result);
                                     using (var db = new LocalDeleteDatabase(m_database))
