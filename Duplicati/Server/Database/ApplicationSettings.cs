@@ -1,6 +1,6 @@
-//  Copyright (C) 2015, The Duplicati Team
+//  Copyright (C) 2011, Kenneth Skovhede
 
-//  http://www.duplicati.com, info@duplicati.com
+//  http://www.hexad.dk, opensource@hexad.dk
 //
 //  This library is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as
@@ -44,7 +44,7 @@ namespace Duplicati.Server.Database
         
         private Dictionary<string, string> m_values;
         private Database.Connection m_connection;
-        private Library.AutoUpdater.UpdateInfo m_latestUpdate;
+        //private Library.AutoUpdater.UpdateInfo m_latestUpdate;
 
         internal ApplicationSettings(Connection con)
         {
@@ -65,6 +65,7 @@ namespace Duplicati.Server.Database
             }
         }
 
+        
         public void UpdateSettings(Dictionary<string, string> newsettings)
         {
             if (newsettings == null)
@@ -72,7 +73,7 @@ namespace Duplicati.Server.Database
 
             lock(m_connection.m_lock)
             {
-                m_latestUpdate = null;
+                //m_latestUpdate = null;
                 m_values.Clear();
 
                 foreach(var k in newsettings)
@@ -85,6 +86,7 @@ namespace Duplicati.Server.Database
             Program.StatusEventNotifyer.SignalNewEvent();
         }
         
+
         private void SaveSettings()
         {
             m_connection.SetSettings(
@@ -94,6 +96,18 @@ namespace Duplicati.Server.Database
                     Name = n.Key,
                     Value = n.Value
                 }, Database.Connection.APP_SETTINGS_ID);
+
+            long? uploadSpeed = null;
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(this.UploadSpeedLimit))
+                    uploadSpeed = Library.Utility.Sizeparser.ParseSize(this.UploadSpeedLimit);
+            }
+            catch
+            {
+            }
+
+            Program.LiveControl.UploadLimit = uploadSpeed;
         }
         
         public string StartupDelayDuration
@@ -158,6 +172,8 @@ namespace Duplicati.Server.Database
                 SaveSettings();
             }
         }
+        
+        
 
         public bool IsFirstRun
         {
@@ -241,7 +257,14 @@ namespace Duplicati.Server.Database
         {
             get 
             {
-                return m_values[CONST.SERVER_PASSPHRASE];
+                try
+                {
+                    return m_values[CONST.SERVER_PASSPHRASE];
+                }
+                catch (KeyNotFoundException)
+                {
+                    return null;
+                }
             }
         }
 
@@ -287,7 +310,7 @@ namespace Duplicati.Server.Database
                 SaveSettings();
             }
         }
-
+        /*
         public DateTime LastUpdateCheck
         {
             get 
@@ -339,7 +362,9 @@ namespace Duplicati.Server.Database
                 }
             }
         }
+        */
 
+        /*
         public Library.AutoUpdater.UpdateInfo UpdatedVersion
         {
             get
@@ -380,6 +405,7 @@ namespace Duplicati.Server.Database
                 SaveSettings();
             }
         }
+        */
 
         public string ServerListenInterface
         {

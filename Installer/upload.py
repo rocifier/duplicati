@@ -32,8 +32,8 @@ def main():
     sys.stdout.write('No name given, exiting\n')  
     sys.exit(-1)
   
-  summary_base = "Duplicati " + file_version
-  filename_base = "Duplicati " + file_version
+  summary_base = "CBD Backup " + file_version
+  filename_base = "CBD Backup " + file_version
   
   sys.stdout.write('Please enter description [' + summary_base + ']: ')
   tmp = file_version = sys.stdin.readline().rstrip()

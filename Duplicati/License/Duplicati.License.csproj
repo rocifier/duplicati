@@ -248,18 +248,9 @@
       <Link>licenses\SharpCompress\licensedata.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="licenses\AWSSDK\" />
-    <Folder Include="licenses\DnsLite\" />
-    <Folder Include="licenses\gdata\" />
-    <Folder Include="licenses\HttpServer\" />
-    <Folder Include="licenses\ManagedLZMA\" />
-    <Folder Include="licenses\MonoMac\" />
-    <Folder Include="licenses\WindowsAzure\" />
-    <Folder Include="licenses\agsXMPP\" />
-    <Folder Include="licenses\SharpAESCrypt\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="VersionTag.txt" />
   </ItemGroup>

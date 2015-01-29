@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<item>
+<title>New version available for CBD Backup</title>
+<version>2.1.0.8</version>
+<url>https://s3.amazonaws.com/cbd-backup-us-east-1/AutoUpdates/CBDBackup.x32.msi</url>
+<changelog>https://s3.amazonaws.com/cbd-backup-us-east-1/AutoUpdates/releasenotes.html</changelog>
+</item>

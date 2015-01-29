@@ -1,6 +1,6 @@
 #region Disclaimer / License
-// Copyright (C) 2015, The Duplicati Team
-// http://www.duplicati.com, info@duplicati.com
+// Copyright (C) 2011, Kenneth Skovhede
+// http://www.hexad.dk, opensource@hexad.dk
 // 
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -184,10 +184,12 @@ namespace Duplicati.Server
             }
 
             m_priority = settings.ThreadPriorityOverride;
+            /*
             if (!string.IsNullOrEmpty(settings.DownloadSpeedLimit))
                 m_downloadLimit = Library.Utility.Sizeparser.ParseSize(settings.DownloadSpeedLimit, "kb");
             if (!string.IsNullOrEmpty(settings.UploadSpeedLimit))
                 m_uploadLimit = Library.Utility.Sizeparser.ParseSize(settings.UploadSpeedLimit, "kb");
+            */
 
             try
             {

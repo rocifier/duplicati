@@ -46,10 +46,10 @@ if exist ..\oem.css copy ..\oem.css .\webroot\stylesheets
 
 REM Prepare the config file with version overrides
 echo "" > "Duplicati.CommandLine.exe.config"
-echo "" > "Duplicati.GUI.TrayIcon.exe.config"
+echo "" > "CBDBackup.exe.config"
 echo "" > "Duplicati.Server.exe.config"
 xcopy /Y ..\..\..\AssemblyRedirects.xml "Duplicati.CommandLine.exe.config"
-xcopy /Y ..\..\..\AssemblyRedirects.xml "Duplicati.GUI.TrayIcon.exe.config"
+xcopy /Y ..\..\..\AssemblyRedirects.xml "CBDBackup.exe.config"
 xcopy /Y ..\..\..\AssemblyRedirects.xml "Duplicati.Server.exe.config"
 
 cd ..\..\..
@@ -62,14 +62,14 @@ xcopy /I /Y "..\thirdparty\SQLite\Bin\sqlite3.dll" "bin\Release\Duplicati"
 
 echo "Building zip version ..."
 cd "bin\Release"
-"%PROGRAMFILES%\7-zip\7z.exe" a -r "Duplicati.zip" Duplicati
+"%PROGRAMFILES%\7-zip\7z.exe" a -r "CBDBackup.zip" Duplicati
 cd "..\.."
 
 echo "Building msi version ..."
 ..\BuildTools\WixProjBuilder\bin\Release\WixProjBuilder.exe WixInstaller.wixproj
-move "bin\Release\Duplicati.msi" "bin\Release\Duplicati.x86.msi"
+move "bin\Release\CBD Backup.msi" "bin\Release\CBDBackup.x86.msi"
 ..\BuildTools\WixProjBuilder\bin\Release\WixProjBuilder.exe --platform=x64 WixInstaller.wixproj
-move "bin\Release\Duplicati.msi" "bin\Release\Duplicati.x64.msi"
+move "bin\Release\CBD Backup.msi" "bin\Release\CBDBackup.x64.msi"
 pause
 
 goto end_of_program

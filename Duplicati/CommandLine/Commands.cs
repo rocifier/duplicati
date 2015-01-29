@@ -1,6 +1,6 @@
-//  Copyright (C) 2015, The Duplicati Team
+//  Copyright (C) 2011, Kenneth Skovhede
 
-//  http://www.duplicati.com, info@duplicati.com
+//  http://www.hexad.dk, opensource@hexad.dk
 //
 //  This library is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as
@@ -349,7 +349,7 @@ namespace Duplicati.CommandLine
             
 			if (!options.Keys.Where(x => requiredOptions.Contains(x, StringComparer.InvariantCultureIgnoreCase)).Any())
 			{
-				Console.WriteLine(Strings.Program.DeleteCommandNeedsOptions("delete", requiredOptions)); 
+				Console.WriteLine(string.Format(Strings.Program.DeleteCommandNeedsOptions, "delete", string.Join(",", requiredOptions))); 
 				return 200;
 			}
         
@@ -630,13 +630,13 @@ namespace Duplicati.CommandLine
                 
         private static int PrintWrongNumberOfArguments(List<string> args, int expected)
         {
-            Console.WriteLine(Strings.Program.WrongNumberOfCommandsError_v2(args.Count, expected, args.Select(n => "\"" + n + "\"").ToArray()));
+            Console.WriteLine(Strings.Program.WrongNumberOfCommandsError_v2, args.Count, expected, args.Count == 0 ? "" : "\"" + string.Join("\", \"", args.ToArray()) + "\"");
             return 200;
         }
 
         public static int PrintInvalidCommand(string command, List<string> args)
         {
-            Console.WriteLine(Strings.Program.InvalidCommandError(command));
+            Console.WriteLine(Strings.Program.InvalidCommandError, command);
             return 200;
         }
 

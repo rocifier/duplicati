@@ -1,6 +1,6 @@
 #region Disclaimer / License
-// Copyright (C) 2015, The Duplicati Team
-// http://www.duplicati.com, info@duplicati.com
+// Copyright (C) 2011, Kenneth Skovhede
+// http://www.hexad.dk, opensource@hexad.dk
 // 
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -92,7 +92,7 @@ namespace Duplicati.Library.Utility
             set 
             {
                 if (!System.IO.Directory.Exists(value))
-                    throw new Exception(Strings.TempFolder.TempFolderDoesNotExistError(value));
+                    throw new Exception(string.Format(Strings.TempFolder.TempFolderDoesNotExistError, value));
                 m_system_temp_dir = value; 
             }
         }

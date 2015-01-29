@@ -1,6 +1,6 @@
 #region Disclaimer / License
-// Copyright (C) 2015, The Duplicati Team
-// http://www.duplicati.com, info@duplicati.com
+// Copyright (C) 2011, Kenneth Skovhede
+// http://www.hexad.dk, opensource@hexad.dk
 // 
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -38,19 +38,47 @@ namespace Duplicati.Library.Backend
         protected bool m_useRRS;
 		protected AmazonS3Client m_client;
 
-        public S3Wrapper(string awsID, string awsKey, string locationConstraint, string servername, bool useRRS, bool useSSL)
+        protected Amazon.RegionEndpoint GetRegionFromStringIdentifier(string region)
         {
-            AmazonS3Config cfg = new AmazonS3Config();
+            switch (region)
+            {
+                case "eu-west-1":
+                    return Amazon.RegionEndpoint.EUWest1;
+                case "eu-central-1":
+                    return Amazon.RegionEndpoint.EUCentral1;
+                case "us-east-1":
+                    return Amazon.RegionEndpoint.USEast1;
+                case "us-west-1":
+                    return Amazon.RegionEndpoint.USWest1;
+                case "us-west-2":
+                    return Amazon.RegionEndpoint.USWest2;
+                case "ap-southeast-1":
+                    return Amazon.RegionEndpoint.APSoutheast1;
+                case "ap-southeast-2":
+                    return Amazon.RegionEndpoint.APSoutheast2;
+                case "ap-northeast-1":
+                    return Amazon.RegionEndpoint.APNortheast1;
+                case "sa-east-1":
+                    return Amazon.RegionEndpoint.SAEast1;
+                default:
+                    return Amazon.RegionEndpoint.USEast1;
+            }
+        }
 
-            cfg.UseHttp = !useSSL;
-            cfg.ServiceURL = (useSSL ? "https://" : "http://") + servername;
-            cfg.UserAgent = "Duplicati v" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() + " S3 client with AWS SDK v" + cfg.GetType().Assembly.GetName().Version.ToString();
-            cfg.BufferSize = (int)Duplicati.Library.Utility.Utility.DEFAULT_BUFFER_SIZE;
+        public S3Wrapper(string awsID, string awsKey, string locationConstraint)
+        {
+            AmazonS3Config cfg = new AmazonS3Config()
+            {
+                UserAgent = "CBD Backup v" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() + " S3 client with AWS SDK v" + GetType().Assembly.GetName().Version.ToString(),
+                AuthenticationRegion = locationConstraint,
+                RegionEndpoint = GetRegionFromStringIdentifier(locationConstraint),
+                BufferSize = (int)Duplicati.Library.Utility.Utility.DEFAULT_BUFFER_SIZE
+            };
 
             m_client = new Amazon.S3.AmazonS3Client(awsID, awsKey, cfg);
 
             m_locationConstraint = locationConstraint;
-            m_useRRS = useRRS;
+            m_useRRS = true; //useRRS;
         }
 
         public void AddBucket(string bucketName)
@@ -61,22 +89,25 @@ namespace Duplicati.Library.Backend
             if (!string.IsNullOrEmpty(m_locationConstraint))
                 request.BucketRegionName = m_locationConstraint;
 
-            m_client.PutBucket(request);
+            PutBucketResponse response = m_client.PutBucket(request);
         }
 
         public virtual void GetFileStream(string bucketName, string keyName, System.IO.Stream target)
         {
-            GetObjectRequest objectGetRequest = new GetObjectRequest();
-            objectGetRequest.BucketName = bucketName;
-            objectGetRequest.Key = keyName;
+            GetObjectRequest objectGetRequest = new GetObjectRequest() {
+                BucketName = bucketName,
+                Key = keyName
+            };
 
-            using(GetObjectResponse objectGetResponse = m_client.GetObject(objectGetRequest))
-            using(System.IO.Stream s = objectGetResponse.ResponseStream)
+            using (GetObjectResponse objectGetResponse = m_client.GetObject(objectGetRequest))
             {
-                try { s.ReadTimeout = (int)TimeSpan.FromMinutes(1).TotalMilliseconds; }
-                catch { }
+                using (System.IO.Stream s = objectGetResponse.ResponseStream)
+                {
+                    try { s.ReadTimeout = (int)TimeSpan.FromMinutes(1).TotalMilliseconds; }
+                    catch { }
 
-                Utility.Utility.CopyStream(s, target);
+                    Utility.Utility.CopyStream(s, target);
+                }
             }
         }
 
@@ -94,22 +125,27 @@ namespace Duplicati.Library.Backend
 
         public virtual void AddFileStream(string bucketName, string keyName, System.IO.Stream source)
         {
-            PutObjectRequest objectAddRequest = new PutObjectRequest();
-            objectAddRequest.BucketName = bucketName;
-            objectAddRequest.Key = keyName;
-            objectAddRequest.InputStream = source;
-            objectAddRequest.StorageClass = m_useRRS ? S3StorageClass.ReducedRedundancy : S3StorageClass.Standard;
-
-            m_client.PutObject(objectAddRequest);
+            // todo: md5 digest without reading stream twice
+            PutObjectRequest objectAddRequest = new PutObjectRequest()
+            {
+                BucketName = bucketName,
+                Key = keyName,
+                InputStream = source,
+                StorageClass = m_useRRS ? S3StorageClass.ReducedRedundancy : S3StorageClass.Standard
+            };
+             
+            PutObjectResponse objectAddResponse = m_client.PutObject(objectAddRequest);
         }
 
         public void DeleteObject(string bucketName, string keyName)
         {
-            DeleteObjectRequest objectDeleteRequest = new DeleteObjectRequest();
-            objectDeleteRequest.BucketName = bucketName;
-            objectDeleteRequest.Key = keyName;
+            DeleteObjectRequest objectDeleteRequest = new DeleteObjectRequest()
+            {
+                BucketName = bucketName,
+                Key = keyName
+            };
 
-            m_client.DeleteObject(objectDeleteRequest);
+            DeleteObjectResponse objectDeleteResponse = m_client.DeleteObject(objectDeleteRequest);
         }
 
         public virtual List<IFileEntry> ListBucket(string bucketName, string prefix)
@@ -133,6 +169,7 @@ namespace Duplicati.Library.Backend
                     listRequest.Prefix = prefix;
 
                 ListObjectsResponse listResponse = m_client.ListObjects(listRequest);
+
                 isTruncated = listResponse.IsTruncated;
                 filename = listResponse.NextMarker;
 
@@ -144,8 +181,9 @@ namespace Duplicati.Library.Backend
                         obj.LastModified,
                         obj.LastModified
                     ));
-
                 }
+
+                //filename = files[files.Count - 1].Name;
             }
 
             //TODO: Figure out if this is the case with AWSSDK too
@@ -165,13 +203,15 @@ namespace Duplicati.Library.Backend
 
         public void RenameFile(string bucketName, string source, string target)
         {
-            CopyObjectRequest copyObjectRequest = new CopyObjectRequest();
-            copyObjectRequest.SourceBucket = bucketName;
-            copyObjectRequest.SourceKey = source;
-            copyObjectRequest.DestinationBucket = bucketName;
-            copyObjectRequest.DestinationKey = target;
+            CopyObjectRequest copyObjectRequest = new CopyObjectRequest()
+            {
+                SourceBucket = bucketName,
+                SourceKey = source,
+                DestinationBucket = bucketName,
+                DestinationKey = target
+            };
 
-            m_client.CopyObject(copyObjectRequest);
+            CopyObjectResponse copyObjectResponse = m_client.CopyObject(copyObjectRequest);
 
             DeleteObject(bucketName, source);
         }

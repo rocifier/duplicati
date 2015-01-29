@@ -68,6 +68,31 @@
     <Compile Include="Scheduler.cs" />
     <Compile Include="Serializable\TreeNode.cs" />
     <Compile Include="SingleInstance.cs" />
+    <Compile Include="Strings\DuplicatiRunner.Designer.cs">
+      <DependentUpon>DuplicatiRunner.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Strings\DynamicSetupHelper.Designer.cs">
+      <DependentUpon>DynamicSetupHelper.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Strings\Program.Designer.cs">
+      <DependentUpon>Program.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Strings\Scheduler.Designer.cs">
+      <DependentUpon>Scheduler.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Strings\TaskType.Designer.cs">
+      <DependentUpon>TaskType.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Serializable\ServerStatus.cs" />
     <Compile Include="Database\Backup.cs" />
     <Compile Include="Serializable\ServerSettings.cs" />
@@ -90,12 +115,10 @@
     <Compile Include="WebServer\ControlMethods\DeleteBackup.cs" />
     <Compile Include="WebServer\ControlMethods\AddOrUpdateBackup.cs" />
     <Compile Include="WebServer\ControlMethods\GetBackup.cs" />
-    <Compile Include="UpdatePollThread.cs" />
     <Compile Include="LogWriteHandler.cs" />
     <Compile Include="Database\Notification.cs" />
     <Compile Include="Database\TempFile.cs" />
     <Compile Include="Serializable\ImportExportStructure.cs" />
-    <Compile Include="Strings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -105,16 +128,9 @@
     <EmbeddedResource Include="Database\Database schema\1. Add Notifications.sql" />
     <EmbeddedResource Include="Database\Database schema\2. Add UIStorage.sql" />
     <EmbeddedResource Include="Database\Database schema\3. Add temp file storage.sql" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CommandLine\BackendTester\Duplicati.CommandLine.BackendTester.csproj">
-      <Project>{E7280DCA-7776-4A73-B9B5-41FD77FC8799}</Project>
-      <Name>Duplicati.CommandLine.BackendTester</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\CommandLine\Duplicati.CommandLine.csproj">
-      <Project>{81765A64-3661-4E3E-B850-2F6F87A51F74}</Project>
-      <Name>Duplicati.CommandLine</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Library\Backend\AzureBlob\Duplicati.Library.Backend.AzureBlob.csproj">
       <Project>{8E4CECFB-0413-4B00-AB93-78D1C3902BD5}</Project>
       <Name>Duplicati.Library.Backend.AzureBlob</Name>
@@ -187,10 +203,6 @@
       <Project>{33FD1D24-C28F-4C71-933F-98F1586EA76C}</Project>
       <Name>Duplicati.Server.Serialization</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CommandLine\BackendTool\Duplicati.CommandLine.BackendTool.csproj">
-      <Project>{2AF960C0-357D-4D44-A3D5-8B6E89DB0F11}</Project>
-      <Name>Duplicati.CommandLine.BackendTool</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Library\Snapshots\Duplicati.Library.Snapshots.csproj">
       <Project>{D63E53E4-A458-4C2F-914D-92F715F58ACE}</Project>
       <Name>Duplicati.Library.Snapshots</Name>
@@ -211,17 +223,33 @@
       <Project>{B68F2214-951F-4F78-8488-66E1ED3F50BF}</Project>
       <Name>Duplicati.Library.Localization</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Library\AutoUpdater\Duplicati.Library.AutoUpdater.csproj">
-      <Project>{7E119745-1F62-43F0-936C-F312A1912C0B}</Project>
-      <Name>Duplicati.Library.AutoUpdater</Name>
-    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Strings\DuplicatiRunner.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>DuplicatiRunner.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Strings\DynamicSetupHelper.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>DynamicSetupHelper.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Strings\Program.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Program.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Strings\Scheduler.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Scheduler.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Strings\TaskType.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TaskType.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="webroot\" />
-    <Folder Include="Database\" />
-    <Folder Include="Database\Database schema\" />
-    <Folder Include="WebServer\" />
-    <Folder Include="WebServer\ControlMethods\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

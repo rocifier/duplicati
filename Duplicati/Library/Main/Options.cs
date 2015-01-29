@@ -1,6 +1,6 @@
 #region Disclaimer / License
-// Copyright (C) 2015, The Duplicati Team
-// http://www.duplicati.com, info@duplicati.com
+// Copyright (C) 2011, Kenneth Skovhede
+// http://www.hexad.dk, opensource@hexad.dk
 // 
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using Duplicati.Library.Interface;
+using Duplicati.Library.Localization.Short;
 
 namespace Duplicati.Library.Main
 {
@@ -172,7 +173,7 @@ namespace Duplicati.Library.Main
             return r.ToArray();
         }
 
-        private static readonly string DEFAULT_COMPRESSED_EXTENSION_FILE = System.IO.Path.Combine(Duplicati.Library.AutoUpdater.UpdaterManager.InstalledBaseDir, "default_compressed_extensions.txt");
+        private static readonly string DEFAULT_COMPRESSED_EXTENSION_FILE = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location), "default_compressed_extensions.txt");
 
         /// <summary>
         /// Lock that protects the options collection
@@ -262,8 +263,6 @@ namespace Duplicati.Library.Main
                     "asynchronous-upload-limit",
                     "asynchronous-upload-folder",
                     "disable-streaming-transfer",
-                    "max-upload-pr-second",
-                    "max-download-pr-second",
                     "no-connection-reuse",
                     "allow-sleep"
                 };
@@ -359,15 +358,6 @@ namespace Duplicati.Library.Main
                     "time",
                     "version",
                     "allow-passphrase-change",
-<<<<<<< HEAD
-<<<<<<< HEAD
-                    "no-local-db",
-                    "no-local-blocks",
-                    "full-block-verification"
-=======
->>>>>>> parent of bbec2e8... Promoted the option --no-local-blocks to a normal option, so restores can be tested without fiddling with source data.
-=======
->>>>>>> parent of bbec2e8... Promoted the option --no-local-blocks to a normal option, so restores can be tested without fiddling with source data.
                 };
             }
         }
@@ -403,7 +393,7 @@ namespace Duplicati.Library.Main
                     new CommandLineArgument("all-versions", CommandLineArgument.ArgumentType.Boolean, Strings.Options.AllversionsShort, Strings.Options.AllversionsLong, "false"),
                     new CommandLineArgument("list-prefix-only", CommandLineArgument.ArgumentType.Boolean, Strings.Options.ListprefixonlyShort, Strings.Options.ListprefixonlyLong, "false"),
                     new CommandLineArgument("list-folder-contents", CommandLineArgument.ArgumentType.Boolean, Strings.Options.ListfoldercontentsShort, Strings.Options.ListfoldercontentsLong, "false"),
-                    new CommandLineArgument("list-sets-only", CommandLineArgument.ArgumentType.Boolean, Strings.Options.ListsetsonlyShort, Strings.Options.ListsetsonlyLong, "false"),
+                    new CommandLineArgument("list-sets-only", CommandLineArgument.ArgumentType.Boolean, LC.L("List only filesets"), LC.L("Use this option to only list filesets and avoid traversing file names and other metadata which slows down the process"), "false"),
                     new CommandLineArgument("disable-autocreate-folder", CommandLineArgument.ArgumentType.Boolean, Strings.Options.DisableautocreatefolderShort, Strings.Options.DisableautocreatefolderLong, "false"),
                     new CommandLineArgument("allow-missing-source", CommandLineArgument.ArgumentType.Boolean, Strings.Options.AllowmissingsourceShort, Strings.Options.AllowmissingsourceLong, "false"),
 
@@ -457,11 +447,11 @@ namespace Duplicati.Library.Main
                     
                     new CommandLineArgument("quota-size", CommandLineArgument.ArgumentType.Size, Strings.Options.QuotasizeShort, Strings.Options.QuotasizeLong),
 
-                    new CommandLineArgument("symlink-policy", CommandLineArgument.ArgumentType.Enumeration, Strings.Options.SymlinkpolicyShort, Strings.Options.SymlinkpolicyLong("store", "ignore", "follow"), Enum.GetName(typeof(SymlinkStrategy), SymlinkStrategy.Store), null, Enum.GetNames(typeof(SymlinkStrategy))),
-                    new CommandLineArgument("hardlink-policy", CommandLineArgument.ArgumentType.Enumeration, Strings.Options.HardlinkpolicyShort, Strings.Options.HardlinkpolicyLong("first", "all", "none"), Enum.GetName(typeof(HardlinkStrategy), HardlinkStrategy.All), null, Enum.GetNames(typeof(HardlinkStrategy))),
-                    new CommandLineArgument("exclude-files-attributes", CommandLineArgument.ArgumentType.String, Strings.Options.ExcludefilesattributesShort, Strings.Options.ExcludefilesattributesLong(Enum.GetNames(typeof(System.IO.FileAttributes)))),
+                    new CommandLineArgument("symlink-policy", CommandLineArgument.ArgumentType.Enumeration, Strings.Options.SymlinkpolicyShort, string.Format(Strings.Options.SymlinkpolicyLong, "store", "ignore", "follow"), Enum.GetName(typeof(SymlinkStrategy), SymlinkStrategy.Store), null, Enum.GetNames(typeof(SymlinkStrategy))),
+                    new CommandLineArgument("hardlink-policy", CommandLineArgument.ArgumentType.Enumeration, Strings.Options.HardlinkpolicyShort, string.Format(Strings.Options.HardlinkpolicyLong, "first", "all", "none"), Enum.GetName(typeof(HardlinkStrategy), HardlinkStrategy.All), null, Enum.GetNames(typeof(HardlinkStrategy))),
+                    new CommandLineArgument("exclude-files-attributes", CommandLineArgument.ArgumentType.String, Strings.Options.ExcludefilesattributesShort, string.Format(Strings.Options.ExcludefilesattributesLong, string.Join(", ", Enum.GetNames(typeof(System.IO.FileAttributes))))),
                     new CommandLineArgument("backup-name", CommandLineArgument.ArgumentType.String, Strings.Options.BackupnameShort, Strings.Options.BackupnameLong, DefaultBackupName),
-                    new CommandLineArgument("compression-extension-file", CommandLineArgument.ArgumentType.Path, Strings.Options.CompressionextensionfileShort, Strings.Options.CompressionextensionfileLong(DEFAULT_COMPRESSED_EXTENSION_FILE), DEFAULT_COMPRESSED_EXTENSION_FILE),
+                    new CommandLineArgument("compression-extension-file", CommandLineArgument.ArgumentType.Path, Strings.Options.CompressionextensionfileShort, string.Format(Strings.Options.CompressionextensionfileLong, DEFAULT_COMPRESSED_EXTENSION_FILE), DEFAULT_COMPRESSED_EXTENSION_FILE),
 
                     new CommandLineArgument("verbose", CommandLineArgument.ArgumentType.Boolean, Strings.Options.VerboseShort, Strings.Options.VerboseLong, "false"),
 
@@ -470,23 +460,23 @@ namespace Duplicati.Library.Main
                     new CommandLineArgument("dbpath", CommandLineArgument.ArgumentType.Path, Strings.Options.DbpathShort, Strings.Options.DbpathLong),
                     new CommandLineArgument("blocksize", CommandLineArgument.ArgumentType.Size, Strings.Options.BlocksizeShort, Strings.Options.BlocksizeLong, DEFAULT_BLOCKSIZE),
                     new CommandLineArgument("file-read-buffer-size", CommandLineArgument.ArgumentType.Size, Strings.Options.FilereadbuffersizeShort, Strings.Options.FilereadbuffersizeLong, "0"),
-                    new CommandLineArgument("store-metadata", CommandLineArgument.ArgumentType.Boolean, Strings.Options.StoremetadataShort, Strings.Options.StoremetadataLong, "true", null, null, Strings.Options.StoremetadataDeprecated),
-                    new CommandLineArgument("skip-metadata", CommandLineArgument.ArgumentType.Boolean, Strings.Options.SkipmetadataShort, Strings.Options.SkipmetadataLong, "false"),
-                    new CommandLineArgument("restore-permissions", CommandLineArgument.ArgumentType.Boolean, Strings.Options.RestorepermissionsShort, Strings.Options.RestorepermissionsLong, "false"),
-                    new CommandLineArgument("skip-restore-verification", CommandLineArgument.ArgumentType.Boolean, Strings.Options.SkiprestoreverificationShort, Strings.Options.SkiprestoreverificationLong, "false"),
+                    new CommandLineArgument("store-metadata", CommandLineArgument.ArgumentType.Boolean, Strings.Options.StoremetadataShort, Strings.Options.StoremetadataLong, "true", null, null, LC.L("This option is no longer used as metadata is now stored by default")),
+                    new CommandLineArgument("skip-metadata", CommandLineArgument.ArgumentType.Boolean, LC.L("Don't store metadata"), LC.L("Use this option to disable the storage of metadata, such as file timestamps. Disabling metadata storage will speed up the backup and restore operations, but does not affect file size much."), "false"),
+                    new CommandLineArgument("restore-permissions", CommandLineArgument.ArgumentType.Boolean, LC.L("Restore file permissions"), LC.L("By default permissions are not restored as they might prevent you from accessing your files. Use this option to restore the permissions as well."), "false"),
+                    new CommandLineArgument("skip-restore-verification", CommandLineArgument.ArgumentType.Boolean, LC.L("Skip restored file check"), LC.L("After restoring files, the file hash of all restored files are checked to verify that the restore was successfull. Use this option to disable the check and avoid waiting for the verification."), "false"),
                     new CommandLineArgument("blockhash-lookup-memory", CommandLineArgument.ArgumentType.Size, Strings.Options.BlockhashlookupsizeShort, Strings.Options.BlockhashlookupsizeLong, "0"),
                     new CommandLineArgument("filehash-lookup-memory", CommandLineArgument.ArgumentType.Size, Strings.Options.FilehashlookupsizeShort, Strings.Options.FilehashlookupsizeLong, "0"),
                     new CommandLineArgument("metadatahash-lookup-memory", CommandLineArgument.ArgumentType.Size, Strings.Options.MetadatahashlookupsizeShort, Strings.Options.MetadatahashlookupsizeLong, "0"),
-                    new CommandLineArgument("old-lookup-memory-defaults", CommandLineArgument.ArgumentType.Size, Strings.Options.OldmemorylookupdefaultsShort, Strings.Options.OldmemorylookupdefaultsLong, "false"),
+                    new CommandLineArgument("old-lookup-memory-defaults", CommandLineArgument.ArgumentType.Size, LC.L("Activate caches"), LC.L("Activate in-memory caches, which are now off by default"), "false"),
                     new CommandLineArgument("disable-filepath-cache", CommandLineArgument.ArgumentType.Boolean, Strings.Options.DisablefilepathcacheShort, Strings.Options.DisablefilepathcacheLong, "true"),
                     new CommandLineArgument("changed-files", CommandLineArgument.ArgumentType.Path, Strings.Options.ChangedfilesShort, Strings.Options.ChangedfilesLong),
-                    new CommandLineArgument("deleted-files", CommandLineArgument.ArgumentType.Path, Strings.Options.DeletedfilesShort, Strings.Options.DeletedfilesLong("changed-files")),
+                    new CommandLineArgument("deleted-files", CommandLineArgument.ArgumentType.Path, Strings.Options.DeletedfilesShort, string.Format(Strings.Options.DeletedfilesLong, "changed-files")),
 
                     new CommandLineArgument("threshold", CommandLineArgument.ArgumentType.Size, Strings.Options.ThresholdShort, Strings.Options.ThresholdLong, DEFAULT_THRESHOLD.ToString()),
                     new CommandLineArgument("index-file-policy", CommandLineArgument.ArgumentType.Enumeration, Strings.Options.IndexfilepolicyShort, Strings.Options.IndexfilepolicyLong, IndexFileStrategy.Full.ToString(), null, Enum.GetNames(typeof(IndexFileStrategy))),
                     new CommandLineArgument("no-backend-verification", CommandLineArgument.ArgumentType.Boolean, Strings.Options.NobackendverificationShort, Strings.Options.NobackendverificationLong, "false"),
-                    new CommandLineArgument("backup-test-samples", CommandLineArgument.ArgumentType.Integer, Strings.Options.BackendtestsamplesShort, Strings.Options.BackendtestsamplesLong("no-backend-verification"), "1"),
-                    new CommandLineArgument("full-remote-verification", CommandLineArgument.ArgumentType.Boolean, Strings.Options.FullremoteverificationShort, Strings.Options.FullremoteverificationLong("no-backend-verification"), "false"),
+                    new CommandLineArgument("backup-test-samples", CommandLineArgument.ArgumentType.Integer, Strings.Options.BackendtestsamplesShort, string.Format(Strings.Options.BackendtestsamplesLong, "no-backend-verification"), "1"),
+                    new CommandLineArgument("full-remote-verification", CommandLineArgument.ArgumentType.Boolean, Strings.Options.FullremoteverificationShort, string.Format(Strings.Options.FullremoteverificationLong, "no-backend-verification"), "false"),
                     new CommandLineArgument("dry-run", CommandLineArgument.ArgumentType.Boolean, Strings.Options.DryrunShort, Strings.Options.DryrunLong, "false", new string[] { "dryrun" }),
 
                     new CommandLineArgument("block-hash-algorithm", CommandLineArgument.ArgumentType.Enumeration, Strings.Options.BlockhashalgorithmShort, Strings.Options.BlockhashalgorithmLong, DEFAULT_BLOCK_HASH_ALGORITHM, null, GetSupportedHashes()),
@@ -503,20 +493,9 @@ namespace Duplicati.Library.Main
                     new CommandLineArgument("keep-time", CommandLineArgument.ArgumentType.Timespan, Strings.Options.KeeptimeShort, Strings.Options.KeeptimeLong),
                     new CommandLineArgument("upload-verification-file", CommandLineArgument.ArgumentType.Boolean, Strings.Options.UploadverificationfileShort, Strings.Options.UploadverificationfileLong, "false"),
                     new CommandLineArgument("allow-passphrase-change", CommandLineArgument.ArgumentType.Boolean, Strings.Options.AllowpassphrasechangeShort, Strings.Options.AllowpassphrasechangeLong, "false"),
-<<<<<<< HEAD
-<<<<<<< HEAD
-                    new CommandLineArgument("no-local-blocks", CommandLineArgument.ArgumentType.Boolean, Strings.Options.NolocalblocksShort, Strings.Options.NolocalblocksLong, "false"),
-                    new CommandLineArgument("full-block-verification", CommandLineArgument.ArgumentType.Boolean, Strings.Options.FullblockverificationShort, Strings.Options.FullblockverificationLong, "false"),
-=======
 #if DEBUG
                     new CommandLineArgument("no-local-blocks", CommandLineArgument.ArgumentType.Boolean, "Prevents using local blocks for restore", "", "false"),
 #endif
->>>>>>> parent of bbec2e8... Promoted the option --no-local-blocks to a normal option, so restores can be tested without fiddling with source data.
-=======
-#if DEBUG
-                    new CommandLineArgument("no-local-blocks", CommandLineArgument.ArgumentType.Boolean, "Prevents using local blocks for restore", "", "false"),
-#endif
->>>>>>> parent of bbec2e8... Promoted the option --no-local-blocks to a normal option, so restores can be tested without fiddling with source data.
                 });
 
                 return lst;
@@ -936,54 +915,52 @@ namespace Duplicati.Library.Main
         /// <summary>
         /// Gets the max upload speed in bytes pr. second
         /// </summary>
-        public long MaxUploadPrSecond
+        public long GetMaxUploadPrSecond()
         {
-            get
+            lock(m_lock)
             {
-                lock(m_lock)
-                {
-                    string v;
-                    m_options.TryGetValue("throttle-upload", out v);
-                    if (string.IsNullOrEmpty(v))
-                        return 0;
-                    else
-                        return Library.Utility.Sizeparser.ParseSize(v, "kb");
-                }
+                string v;
+                m_options.TryGetValue("throttle-upload", out v);
+                if (string.IsNullOrEmpty(v))
+                    return 0;
+                else
+                    return Library.Utility.Sizeparser.ParseSize(v, "kb");
             }
-            set
+        }
+        public void SetMaxUploadPrSecond(long value) 
+        {
+            lock (m_lock)
             {
-                lock (m_lock)
-                    if (value <= 0)
-                        m_options["throttle-upload"] = "";
-                    else
-                        m_options["throttle-upload"] = value.ToString() + "b";
+                if (value <= 0)
+                    m_options["throttle-upload"] = "";
+                else
+                    m_options["throttle-upload"] = value.ToString() + "b";
             }
         }
 
         /// <summary>
         /// Gets or sets the max download speed in bytes pr. second
         /// </summary>
-        public long MaxDownloadPrSecond
+        public long GetMaxDownloadPrSecond()
         {
-            get
+            lock (m_lock)
             {
-                lock (m_lock)
-                {
-                    string v;
-                    m_options.TryGetValue("throttle-download", out v);
-                    if (string.IsNullOrEmpty(v))
-                        return 0;
-                    else
-                        return Library.Utility.Sizeparser.ParseSize(v, "kb");
-                }
+                string v;
+                m_options.TryGetValue("throttle-download", out v);
+                if (string.IsNullOrEmpty(v))
+                    return 0;
+                else
+                    return Library.Utility.Sizeparser.ParseSize(v, "kb");
             }
-            set
+        }
+        public void SetMaxDownloadPrSecond(long value) 
+        {
+            lock (m_lock)
             {
-                lock (m_lock)
-                    if (value <= 0)
-                        m_options["throttle-download"] = "";
-                    else
-                        m_options["throttle-download"] = value.ToString() + "b";
+                if (value <= 0)
+                    m_options["throttle-download"] = "";
+                else
+                    m_options["throttle-download"] = value.ToString() + "b";
             }
         }
 
@@ -1713,16 +1690,7 @@ namespace Duplicati.Library.Main
         {
             get { return Library.Utility.Utility.ParseBoolOption(m_options, "no-local-db"); }
         }
-
-        /// <summary>
-        /// Gets a flag indicating if block hashes are checked before being applied
-        /// </summary>
-        /// <value><c>true</c> if block hashes are checked; otherwise, <c>false</c>.</value>
-        public bool FullBlockVerification
-        {
-            get { return Library.Utility.Utility.ParseBoolOption(m_options, "full-block-verification"); }
-        }
-
+        
         /// <summary>
         /// Gets a lookup table with compression hints, the key is the file extension with the leading period
         /// </summary>

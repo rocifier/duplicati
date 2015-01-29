@@ -1,6 +1,6 @@
-//  Copyright (C) 2015, The Duplicati Team
+//  Copyright (C) 2011, Kenneth Skovhede
 
-//  http://www.duplicati.com, info@duplicati.com
+//  http://www.hexad.dk, opensource@hexad.dk
 //
 //  This library is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as
@@ -153,9 +153,9 @@ namespace Duplicati.Library.Main.Operation
             var blockhasher = System.Security.Cryptography.HashAlgorithm.Create(options.BlockHashAlgorithm);
  
             if (blockhasher == null)
-                throw new Exception(Strings.Foresthash.InvalidHashAlgorithm(options.BlockHashAlgorithm));
+                throw new Exception(string.Format(Strings.Foresthash.InvalidHashAlgorithm, options.BlockHashAlgorithm));
             if (!blockhasher.CanReuseTransform)
-                throw new Exception(Strings.Foresthash.InvalidCryptoSystem(options.BlockHashAlgorithm));
+                throw new Exception(string.Format(Strings.Foresthash.InvalidCryptoSystem, options.BlockHashAlgorithm));
                 
             var hashsize = blockhasher.HashSize / 8;
             var parsedInfo = Volumes.VolumeBase.ParseFilename(vol.Name);

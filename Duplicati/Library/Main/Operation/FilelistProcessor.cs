@@ -1,6 +1,6 @@
-//  Copyright (C) 2015, The Duplicati Team
+//  Copyright (C) 2011, Kenneth Skovhede
 
-//  http://www.duplicati.com, info@duplicati.com
+//  http://www.hexad.dk, opensource@hexad.dk
 //
 //  This library is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as
@@ -254,9 +254,8 @@ namespace Duplicati.Library.Main.Operation
                         }
                         else if (!remoteFound)
                         {
-                            log.AddMessage(string.Format("scheduling missing file for deletion, currently listed as {0}: {1}", i.State, i.Name));
+                            log.AddMessage(string.Format("removing missing file listed as {0}: {1}", i.State, i.Name));
                             database.RemoveRemoteVolume(i.Name, null);
-                            database.RegisterRemoteVolume(i.Name, i.Type, RemoteVolumeState.Deleting, null);
                         }
                         else
                         {

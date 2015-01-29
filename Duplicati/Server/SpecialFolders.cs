@@ -1,6 +1,6 @@
-﻿//  Copyright (C) 2015, The Duplicati Team
+﻿//  Copyright (C) 2011, Kenneth Skovhede
 
-//  http://www.duplicati.com, info@duplicati.com
+//  http://www.hexad.dk, opensource@hexad.dk
 //
 //  This library is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as

@@ -1,6 +1,6 @@
-﻿//  Copyright (C) 2015, The Duplicati Team
+﻿//  Copyright (C) 2014, Kenneth Skovhede
 
-//  http://www.duplicati.com, info@duplicati.com
+//  http://www.hexad.dk, opensource@hexad.dk
 //
 //  This library is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as
@@ -52,7 +52,10 @@ namespace Duplicati.Library.Backend
             ConfigType ct;
             if (!Enum.TryParse<ConfigType>(k, true, out ct))
                 ct = DEFAULT_CONFIG_TYPE;
-             
+
+            return S3.KNOWN_S3_LOCATIONS.ToDictionary((x) => x.Key, (y) => y.Value);
+            
+            /*
             switch (ct)
             {
                 case ConfigType.RegionHosts:
@@ -62,13 +65,14 @@ namespace Duplicati.Library.Backend
                 default:
                     return S3.KNOWN_S3_PROVIDERS.ToDictionary((x) => x.Key, (y) => y.Value);
             }
+             * */
         }
 
         public string Key { get { return "s3-getconfig"; } }
 
-        public string DisplayName { get { return "S3 configuration module"; } }
+        public string DisplayName { get { return "Cloud Configuration"; } }
 
-        public string Description { get { return "Exposes S3 configuration as a web module"; } }
+        public string Description { get { return "Exposes cloud configuration as a web module"; } }
 
         public IList<ICommandLineArgument> SupportedCommands
         {

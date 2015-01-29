@@ -1,6 +1,6 @@
 #region Disclaimer / License
-// Copyright (C) 2015, The Duplicati Team
-// http://www.duplicati.com, info@duplicati.com
+// Copyright (C) 2011, Kenneth Skovhede
+// http://www.hexad.dk, opensource@hexad.dk
 // 
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -44,15 +44,6 @@ namespace Duplicati.Library.Utility
         public event ThrottledStreamCallback Callback;
 
         /// <summary>
-        /// The max number of bytes pr. second to write
-        /// </summary>
-        private long m_writespeed;
-        /// <summary>
-        /// The max number of bytes pr. second to read
-        /// </summary>
-        private long m_readspeed;
-
-        /// <summary>
         /// This is a list of the most recent reads. The key is the tick at the time, and the value is the number of bytes.
         /// </summary>
         List<KeyValuePair<long, long>> m_dataread;
@@ -68,6 +59,9 @@ namespace Duplicati.Library.Utility
         /// This is the sum of all bytes in the m_datawritten table, summed for fast access.
         /// </summary>
         private long m_byteswritten;
+
+        private long m_readspeed;
+        private long m_writespeed;
 
         /// <summary>
         /// The number of bytes transfered without raising an event
@@ -104,9 +98,9 @@ namespace Duplicati.Library.Utility
             m_readspeed = readspeed;
             m_writespeed = writespeed;
 
-            if (m_basestream.CanRead && m_readspeed > 0)
+            if (m_basestream.CanRead && readspeed > 0)
                 m_dataread = new List<KeyValuePair<long, long>>();
-            if (m_basestream.CanWrite && m_writespeed > 0)
+            if (m_basestream.CanWrite && writespeed > 0)
                 m_datawritten = new List<KeyValuePair<long, long>>();
         }
 
@@ -151,7 +145,25 @@ namespace Duplicati.Library.Utility
         public long ReadSpeed
         {
             get { return m_readspeed; }
-            set { m_readspeed = value; }
+            set
+            {
+                long oldReadSpeed = m_readspeed;
+
+                m_readspeed = value;
+
+                if (m_basestream.CanRead && m_readspeed > 0)
+                {
+                    if (oldReadSpeed == 0)
+                    {
+                        // create this for the first time
+                        m_dataread = new List<KeyValuePair<long, long>>();
+                    }
+                }
+                else
+                {
+                    m_dataread = null;
+                }
+            }
         }
 
         /// <summary>
@@ -161,7 +173,24 @@ namespace Duplicati.Library.Utility
         public long WriteSpeed
         {
             get { return m_writespeed; }
-            set { m_writespeed = value; }
+            set {
+                long oldWriteSpeed = m_writespeed;
+
+                m_writespeed = value;
+
+                if (m_basestream.CanWrite && m_writespeed > 0)
+                {
+                    if (oldWriteSpeed == 0)
+                    {
+                        // create this for the first time
+                        m_dataread = new List<KeyValuePair<long, long>>();
+                    }
+                }
+                else
+                {
+                    m_datawritten = null;
+                }
+            }
         }
 
         /// <summary>
@@ -182,7 +211,7 @@ namespace Duplicati.Library.Utility
 
             if (table != null)
             {
-                long maxspeed = read ? m_readspeed : m_writespeed;
+                long maxspeed = read ? ReadSpeed : WriteSpeed;
                 Stream stream = m_basestream;
                 long bytecount = read ? m_bytesread : m_byteswritten;
 
@@ -210,7 +239,8 @@ namespace Duplicati.Library.Utility
                     if (speed > maxspeed)
                     {
                         //We are too fast, delay the access. Calculating how much wait we need.
-                        double secondsNeeded = (bytecount / (double)maxspeed) - duration.TotalSeconds;
+                        double secondsNeeded = speed / maxspeed; //(bytecount / (double)maxspeed) - duration.TotalSeconds;
+                        if (secondsNeeded > 10) secondsNeeded = 10; // If we throttle from one extreme to another, or there are large network spikes, this can get weird values.
                         long delayTicks = (long)(secondsNeeded * TimeSpan.TicksPerSecond);
 
                         //Calculate the time we should finish, to obey the limit

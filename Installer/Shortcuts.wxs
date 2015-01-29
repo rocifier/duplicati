@@ -3,17 +3,17 @@
 	<Fragment>
 
     <DirectoryRef Id="ProgramMenuFolder">
-      <Directory Id="DuplicatiProgramMenuLocation" Name="Duplicati">
+      <Directory Id="DuplicatiProgramMenuLocation" Name="CBDBackup">
         <Component Id="DuplicatiProgramMenuShortcutComponent" Guid="1D03AB64-E310-4974-835E-E9E8CFB18BBC">
           <CreateFolder />
           <Shortcut Id="DuplicatiProgramMenuShortcut"
-                    Name="Duplicati"
+                    Name="CBDBackup"
                     WorkingDirectory="INSTALLLOCATION"
-                    Description="Launch Duplicati"
+                    Description="Launch CBD Backup"
                     Directory="DuplicatiProgramMenuLocation"
                     Icon="DuplicatiIcon.exe"
                     IconIndex="0"
-                    Target="[INSTALLLOCATION]Duplicati.GUI.TrayIcon.exe"
+                    Target="[INSTALLLOCATION]CBDBackup.exe"
                     />
           <RegistryKey Root="HKCU" Key="Software\HexaD\Duplicati\ProgramMenuShortcut">
             <RegistryValue
@@ -29,15 +29,15 @@
     <DirectoryRef Id="DesktopFolder">
       <Component Id="DuplicatiDesktopShortcutComponent" Guid="7BF060B8-389F-4a95-931C-5D551E55902A">
         <Shortcut Id="DuplicatiDesktopComponent"
-                  Name="Duplicati"
+                  Name="CBDBackup"
                   WorkingDirectory="INSTALLLOCATION"
-                  Description="Launch Duplicati"
+                  Description="Launch CBD Backup"
                   Directory="DesktopFolder"
                   Icon="DuplicatiIcon.exe"
                   IconIndex="0"
-                  Target="[INSTALLLOCATION]Duplicati.GUI.TrayIcon.exe"
+                  Target="[INSTALLLOCATION]CBDBackup.exe"
                 />
-        <RegistryKey Root="HKCU" Key="Software\HexaD\Duplicati\DesktopFolderShortcut">
+        <RegistryKey Root="HKCU" Key="Software\HexaD\CBDBackup\DesktopFolderShortcut">
           <RegistryValue
                   Value="Installed"
                   Type="string"
@@ -50,16 +50,16 @@
       <Directory Id="StartupFolder">
         <Component Id="StartupMenuItem" Guid="A85B1D4E-26EF-4d6a-8C1F-279EAABCE8DE">
           <Shortcut Id="DuplicatiStartupComponent"
-                    Name="Duplicati"
+                    Name="CBDBackup"
                     WorkingDirectory="INSTALLLOCATION"
-                    Description="Launch Duplicati"
+                    Description="Launch CBD Backup"
                     Directory="StartupFolder"
                     Icon="DuplicatiIcon.exe"
                     IconIndex="0"
-                    Target="[INSTALLLOCATION]Duplicati.GUI.TrayIcon.exe"
+                    Target="[INSTALLLOCATION]CBDBackup.exe"
                 />
           
-          <RegistryKey Root="HKCU" Key="Software\HexaD\Duplicati\StartupShortcut">
+          <RegistryKey Root="HKCU" Key="Software\HexaD\CBDBackup\StartupShortcut">
             <RegistryValue
                     Value="Installed"
                     Type="string"
@@ -70,7 +70,7 @@
       </Directory>
     </DirectoryRef>
 
-    <Icon Id="DuplicatiIcon.exe" SourceFile="..\Duplicati\GUI\Duplicati.GUI.TrayIcon\bin\Release\Duplicati.GUI.TrayIcon.exe" />
+    <Icon Id="DuplicatiIcon.exe" SourceFile="..\Duplicati\GUI\Duplicati.GUI.TrayIcon\bin\Release\CBDBackup.exe" />
 
   </Fragment>
 </Wix>

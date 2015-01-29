@@ -1,6 +1,6 @@
-//  Copyright (C) 2015, The Duplicati Team
+//  Copyright (C) 2011, Kenneth Skovhede
 
-//  http://www.duplicati.com, info@duplicati.com
+//  http://www.hexad.dk, opensource@hexad.dk
 //
 //  This library is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as
@@ -49,9 +49,9 @@ namespace Duplicati.Library.Main
                 m_values = values;
                 var hasher = System.Security.Cryptography.HashAlgorithm.Create(options.BlockHashAlgorithm);
                 if (hasher == null)
-                    throw new Exception(Strings.Foresthash.InvalidHashAlgorithm(options.BlockHashAlgorithm));
+                    throw new Exception(string.Format(Strings.Foresthash.InvalidHashAlgorithm, options.BlockHashAlgorithm));
                 if (!hasher.CanReuseTransform)
-                    throw new Exception(Strings.Foresthash.InvalidCryptoSystem(options.BlockHashAlgorithm));
+                    throw new Exception(string.Format(Strings.Foresthash.InvalidCryptoSystem, options.BlockHashAlgorithm));
                     
                 using (var ms = new System.IO.MemoryStream())
                 using (var w = new StreamWriter(ms, Encoding.UTF8))

@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Net;
 using Duplicati.Library.Interface;
+using Duplicati.Library.Localization.Short;
 
 namespace Duplicati.Library.Backend
 {
@@ -46,7 +47,7 @@ namespace Duplicati.Library.Backend
                 m_authid = options[AUTHID_OPTION];
 
             if (string.IsNullOrEmpty(m_authid))
-                throw new Exception(Strings.OneDrive.MissingAuthID(WLID_LOGIN));
+                throw new Exception(string.Format(LC.L("You need an AuthID, you can get it from: {0}"), WLID_LOGIN));
         }
 
         private class WLID_Service_Response
@@ -129,7 +130,7 @@ namespace Duplicati.Library.Backend
                             }
                         }
 
-                        throw new Exception(Strings.OneDrive.AuthorizationFailure(msg, WLID_LOGIN), ex);
+                        throw new Exception(LC.L("Failed to authorize using the WLID service: {0}. If the problem persists, try generating a new authid token from: {1}", msg, WLID_LOGIN), ex);
                     }
                 }
 
@@ -184,7 +185,7 @@ namespace Duplicati.Library.Backend
                         {
                             new Newtonsoft.Json.JsonSerializer().Serialize(sw, new WLID_CreateFolderData() {
                                 name = f,
-                                description = Strings.OneDrive.AutoCreatedFolderLabel
+                                description = LC.L("Autocreated folder")
                             });
 
                             sw.Flush();
@@ -203,12 +204,12 @@ namespace Duplicati.Library.Backend
                         using (var jr = new Newtonsoft.Json.JsonTextReader(tr))
                         {
                             if ((int)resp.StatusCode < 200 || (int)resp.StatusCode > 299)
-                                throw new ProtocolViolationException(Strings.OneDrive.UnexpectedError(resp.StatusCode, resp.StatusDescription));
+                                throw new ProtocolViolationException(string.Format(LC.L("Unexpected error code: {0} - {1}"), resp.StatusCode, resp.StatusDescription));
                             cur = new Newtonsoft.Json.JsonSerializer().Deserialize<WLID_FolderItem>(jr);
                         }
                     }
                     else
-                        throw new FolderMissingException(Strings.OneDrive.MissingFolderError(f));
+                        throw new FolderMissingException(LC.L("Missing the folder: {0}", f));
                 }
                 else
                     cur = n;
@@ -239,7 +240,7 @@ namespace Duplicati.Library.Backend
                 m_fileidCache.TryGetValue(name, out id);
 
                 if (string.IsNullOrWhiteSpace(id) && throwIfMissing)
-                    throw new System.IO.FileNotFoundException(Strings.OneDrive.FileNotFoundError, name);
+                    throw new System.IO.FileNotFoundException(LC.L("File not found"), name);
             }
 
             return id;
@@ -259,7 +260,7 @@ namespace Duplicati.Library.Backend
 
         public string DisplayName
         {
-            get { return Strings.OneDrive.DisplayName; }
+            get { return LC.L("Microsoft OneDrive"); }
         }
 
         public string ProtocolKey
@@ -317,7 +318,7 @@ namespace Duplicati.Library.Backend
                         throw new FileMissingException();
 
                     if ((int)resp.StatusCode < 200 || (int)resp.StatusCode > 299)
-                        throw new ProtocolViolationException(Strings.OneDrive.UnexpectedError(resp.StatusCode, resp.StatusDescription));
+                        throw new ProtocolViolationException(string.Format(LC.L("Unexpected error code: {0} - {1}"), resp.StatusCode, resp.StatusDescription));
                     m_fileidCache.Remove(remotename);
                 }
             }
@@ -335,14 +336,14 @@ namespace Duplicati.Library.Backend
         {
             get {
                 return new List<ICommandLineArgument>(new ICommandLineArgument[] {
-                    new CommandLineArgument(AUTHID_OPTION, CommandLineArgument.ArgumentType.Password, Strings.OneDrive.AuthidShort, Strings.OneDrive.AuthidLong(WLID_LOGIN)),
+                    new CommandLineArgument(AUTHID_OPTION, CommandLineArgument.ArgumentType.Password, LC.L("The authorization code"), string.Format(LC.L("The authorization token retrieved from {0}", WLID_LOGIN))),
                 });
             }
         }
 
         public string Description
         {
-            get { return Strings.OneDrive.Description(
+            get { return LC.L("Stores files on Microsoft OneDrive. Usage of this backend requires that you agree to the terms in {0} ({1}) and {2} ({3})",
                     "Microsoft Service Agreement",
                     "http://explore.live.com/microsoft-service-agreement",
                     "Microsoft Online Privacy Statement", 

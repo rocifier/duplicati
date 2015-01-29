@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Duplicati.Library.Localization.Short;
 
 namespace Duplicati.Server
 {
@@ -10,17 +11,17 @@ namespace Duplicati.Server
         /// <summary>
         /// The path to the directory that contains the main executable
         /// </summary>
-        public static readonly string StartupPath = Duplicati.Library.AutoUpdater.UpdaterManager.InstalledBaseDir;
+        public static readonly string StartupPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
 
         /// <summary>
         /// The name of the environment variable that holds the path to the data folder used by Duplicati
         /// </summary>
-        public static readonly string DATAFOLDER_ENV_NAME = Duplicati.Library.AutoUpdater.AutoUpdateSettings.AppName.ToUpper() + "_HOME";
+        public static readonly string DATAFOLDER_ENV_NAME = "CBDBACKUP_HOME";
 
         /// <summary>
         /// The environment variable that holdes the database key used to encrypt the SQLite database
         /// </summary>
-        public static readonly string DB_KEY_ENV_NAME = Duplicati.Library.AutoUpdater.AutoUpdateSettings.AppName.ToUpper() + "_DB_KEY";
+        public static readonly string DB_KEY_ENV_NAME = "CBDBACKUP_DB_KEY";
 
         /// <summary>
         /// Gets the folder where Duplicati data is stored
@@ -85,7 +86,7 @@ namespace Duplicati.Server
         /// <summary>
         /// The update poll thread.
         /// </summary>
-        public static UpdatePollThread UpdatePoller;
+        //public static UpdatePollThread UpdatePoller;
         
         /// <summary>
         /// An event that is set once the server is ready to respond to requests
@@ -142,13 +143,19 @@ namespace Duplicati.Server
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
+        /*
         [STAThread]
         public static int Main(string[] args)
         {
             return Duplicati.Library.AutoUpdater.UpdaterManager.RunFromMostRecent(typeof(Program).GetMethod("RealMain"), args, Duplicati.Library.AutoUpdater.AutoUpdateStrategy.Never);
         }
+         */
 
-        public static void RealMain(string[] args)
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        public static void Main(string[] args)
         {
             //If we are on Windows, append the bundled "win-tools" programs to the search path
             //We add it last, to allow the user to override with other versions
@@ -186,7 +193,7 @@ namespace Duplicati.Server
                 //If you change the key, please note that you need to supply the same
                 // key when restoring the setup, as the setup being backed up will
                 // be encrypted as well.
-                Environment.SetEnvironmentVariable(DB_KEY_ENV_NAME, Library.AutoUpdater.AutoUpdateSettings.AppName + "_Key_42");
+                Environment.SetEnvironmentVariable(DB_KEY_ENV_NAME, "CBDBACKUP_Key_42");
             }
 
 
@@ -209,7 +216,7 @@ namespace Duplicati.Server
                     Console.WriteLine(Strings.Program.HelpDisplayDialog);
 
                     foreach(Library.Interface.ICommandLineArgument arg in SupportedCommands)
-                        Console.WriteLine(Strings.Program.HelpDisplayFormat(arg.Name, arg.LongDescription));
+                        Console.WriteLine(Strings.Program.HelpDisplayFormat, arg.Name, arg.LongDescription);
 
                     return;
                 }
@@ -246,7 +253,7 @@ namespace Duplicati.Server
                 else
                 {
                     //Normal release mode uses the systems "Application Data" folder
-                    Environment.SetEnvironmentVariable(DATAFOLDER_ENV_NAME, System.IO.Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Library.AutoUpdater.AutoUpdateSettings.AppName));
+                    Environment.SetEnvironmentVariable(DATAFOLDER_ENV_NAME, System.IO.Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "CBDBACKUP"));
                 }
 #endif
             }
@@ -256,18 +263,18 @@ namespace Duplicati.Server
                 try
                 {
                     //This will also create Program.DATAFOLDER if it does not exist
-                    Instance = new SingleInstance(Duplicati.Library.AutoUpdater.AutoUpdateSettings.AppName, Program.DATAFOLDER);
+                    Instance = new SingleInstance("CBDBACKUP", Program.DATAFOLDER);
                 }
                 catch (Exception ex)
                 {
                     if (writeConsole)
                     {
-                        Console.WriteLine(Strings.Program.StartupFailure(ex));
+                        Console.WriteLine(Strings.Program.StartupFailure, ex.ToString());
                         return;
                     }
                     else
                     {
-                        throw new Exception(Strings.Program.StartupFailure(ex));
+                        throw new Exception(Strings.Program.StartupFailure, ex);
                     }
                 }
 
@@ -306,12 +313,12 @@ namespace Duplicati.Server
                     if (writeConsole)
                     {
                         //The official Mono SQLite provider is also broken with less than 3.6.3
-                        Console.WriteLine(Strings.Program.WrongSQLiteVersion(sqliteVersion, "3.6.3"));
+                        Console.WriteLine(Strings.Program.WrongSQLiteVersion, sqliteVersion, "3.6.3");
                         return;
                     }
                     else
                     {
-                        throw new Exception(Strings.Program.WrongSQLiteVersion(sqliteVersion, "3.6.3"));
+                        throw new Exception(string.Format(Strings.Program.WrongSQLiteVersion, sqliteVersion, "3.6.3"));
                     }
                 }
 
@@ -345,12 +352,12 @@ namespace Duplicati.Server
 
                     if (writeConsole)
                     {
-                        Console.WriteLine(Strings.Program.DatabaseOpenError(ex.Message));
+                        Console.WriteLine(Strings.Program.DatabaseOpenError, ex.Message);
                         return;
                     }
                     else
                     {
-                        throw new Exception(Strings.Program.DatabaseOpenError(ex.Message), ex);
+                        throw new Exception(string.Format(Strings.Program.DatabaseOpenError, ex.Message), ex);
                     }
                 }
 
@@ -361,13 +368,14 @@ namespace Duplicati.Server
 
                 ApplicationExitEvent = new System.Threading.ManualResetEvent(false);
                     
+                /*
                 Duplicati.Library.AutoUpdater.UpdaterManager.OnError += (Exception obj) =>
                 {
                     Program.DataConnection.LogError(null, "Error in updater", obj);
                 };
 
-
                 UpdatePoller = new UpdatePollThread();
+                 */
                 DateTime lastPurge = new DateTime(0);
 
                 System.Threading.TimerCallback purgeTempFilesCallback = (x) => {
@@ -449,26 +457,26 @@ namespace Duplicati.Server
             }
             catch (SingleInstance.MultipleInstanceException mex)
             {
-                System.Diagnostics.Trace.WriteLine(Strings.Program.SeriousError(mex.ToString()));
+                System.Diagnostics.Trace.WriteLine(string.Format(Strings.Program.SeriousError, mex.ToString()));
                 if (writeConsole)
-                    Console.WriteLine(Strings.Program.SeriousError(mex.ToString()));
+                    Console.WriteLine(Strings.Program.SeriousError, mex.ToString());
                 else
                     throw mex;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine(Strings.Program.SeriousError(ex.ToString()));
+                System.Diagnostics.Trace.WriteLine(string.Format(Strings.Program.SeriousError, ex.ToString()));
                 if (writeConsole)
-                    Console.WriteLine(Strings.Program.SeriousError(ex.ToString()));
+                    Console.WriteLine(Strings.Program.SeriousError, ex.ToString());
                 else
-                    throw new Exception(Strings.Program.SeriousError(ex.ToString()), ex);
+                    throw new Exception(string.Format(Strings.Program.SeriousError, ex.ToString()), ex);
             }
             finally
             {
                 StatusEventNotifyer.SignalNewEvent();
 
-                if (UpdatePoller != null)
-                    UpdatePoller.Terminate();
+                //if (UpdatePoller != null)
+                //    UpdatePoller.Terminate();
                 if (Scheduler != null)
                     Scheduler.Terminate(true);
                 if (WorkThread != null)
@@ -491,8 +499,7 @@ namespace Duplicati.Server
         private static void SignalNewEvent(object sender, EventArgs e)
         {
             StatusEventNotifyer.SignalNewEvent();
-        }   
-
+        }
 
         /// <summary>
         /// Handles a change in the LiveControl and updates the Runner
@@ -511,6 +518,11 @@ namespace Duplicati.Server
         /// <param name="e"></param>
         private static void LiveControl_ThrottleSpeedChanged(object sender, EventArgs e)
         {
+            var task = Program.WorkThread.CurrentTask as Duplicati.Server.Runner.IRunnerData;
+            if (task != null)
+            {
+                task.SetSpeedLimit(Program.LiveControl.UploadLimit ?? 0, Program.LiveControl.DownloadLimit ?? 0);
+            }
             StatusEventNotifyer.SignalNewEvent();
         }
 
@@ -667,7 +679,7 @@ namespace Duplicati.Server
                     new Duplicati.Library.Interface.CommandLineArgument(Duplicati.Server.WebServer.Server.OPTION_PORT, Duplicati.Library.Interface.CommandLineArgument.ArgumentType.String, Strings.Program.WebserverPortDescription, Strings.Program.WebserverPortDescription, Duplicati.Server.WebServer.Server.DEFAULT_OPTION_PORT.ToString()),
                     new Duplicati.Library.Interface.CommandLineArgument(Duplicati.Server.WebServer.Server.OPTION_INTERFACE, Duplicati.Library.Interface.CommandLineArgument.ArgumentType.String, Strings.Program.WebserverInterfaceDescription, Strings.Program.WebserverInterfaceDescription, Duplicati.Server.WebServer.Server.DEFAULT_OPTION_INTERFACE),
                     new Duplicati.Library.Interface.CommandLineArgument("webservice-password", Duplicati.Library.Interface.CommandLineArgument.ArgumentType.Password, Strings.Program.WebserverPasswordDescription, Strings.Program.WebserverPasswordDescription),
-                    new Duplicati.Library.Interface.CommandLineArgument("ping-pong-keepalive", Duplicati.Library.Interface.CommandLineArgument.ArgumentType.Boolean, Strings.Program.PingpongkeepaliveShort, Strings.Program.PingpongkeepaliveLong),
+                    new Duplicati.Library.Interface.CommandLineArgument("ping-pong-keepalive", Duplicati.Library.Interface.CommandLineArgument.ArgumentType.Boolean, LC.L("Enables the ping-pong responder"), LC.L("When running as a server, the service daemon must verify that the process is responding. If this option is enabled, the server reads stdin and writes a reply to each line read")),
                 };
             }
         }

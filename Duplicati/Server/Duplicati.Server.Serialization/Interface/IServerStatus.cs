@@ -16,10 +16,10 @@ namespace Duplicati.Server.Serialization.Interface
         long LastDataUpdateID { get; }
         long LastNotificationUpdateID { get; }
 
-        string UpdatedVersion { get; }
-        UpdatePollerStates UpdaterState { get; }
-        bool UpdateReady { get; }
-        double UpdateDownloadProgress { get; }
+        //string UpdatedVersion { get; }
+        //UpdatePollerStates UpdaterState { get; }
+        //bool UpdateReady { get; }
+        //double UpdateDownloadProgress { get; }
 
     }
 }

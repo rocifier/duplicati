@@ -1,6 +1,6 @@
 #region Disclaimer / License
-// Copyright (C) 2015, The Duplicati Team
-// http://www.duplicati.com, info@duplicati.com
+// Copyright (C) 2011, Kenneth Skovhede
+// http://www.hexad.dk, opensource@hexad.dk
 // 
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using Duplicati.Library.Interface;
-using System.Linq;
 
 namespace Duplicati.Library.Backend
 {
@@ -202,7 +201,7 @@ namespace Duplicati.Library.Backend
             catch (System.Net.WebException wex)
             {
                 if (wex.Response as System.Net.FtpWebResponse != null && (wex.Response as System.Net.FtpWebResponse).StatusCode == System.Net.FtpStatusCode.ActionNotTakenFileUnavailable)
-                    throw new Interface.FolderMissingException(Strings.FTPBackend.MissingFolderError(req.RequestUri.PathAndQuery, wex.Message), wex);
+                    throw new Interface.FolderMissingException(string.Format(Strings.FTPBackend.MissingFolderError, req.RequestUri.PathAndQuery, wex.Message), wex);
                 else
                     throw;
             }
@@ -228,23 +227,26 @@ namespace Duplicati.Library.Backend
                 if (m_listVerify) 
                 {
                     List<IFileEntry> files = List(remotename);
+                    StringBuilder sb = new StringBuilder();
                     foreach(IFileEntry fe in files)
                         if (fe.Name.Equals(remotename) || fe.Name.EndsWith("/" + remotename) || fe.Name.EndsWith("\\" + remotename)) 
                         {
                             if (fe.Size < 0 || streamLen < 0 || fe.Size == streamLen)
                                 return;
                         
-                            throw new Exception(Strings.FTPBackend.ListVerifySizeFailure(remotename, fe.Size, streamLen));
+                            throw new Exception(string.Format(Strings.FTPBackend.ListVerifySizeFailure, remotename, fe.Size, streamLen));
                         } 
-
-                    throw new Exception(Strings.FTPBackend.ListVerifyFailure(remotename, files.Select(n => n.Name)));
+                        else
+                            sb.AppendLine(fe.Name);
+                    
+                    throw new Exception(string.Format(Strings.FTPBackend.ListVerifyFailure, remotename, sb.ToString()));
                 }
                 
             }
             catch (System.Net.WebException wex)
             {
                 if (req != null && wex.Response as System.Net.FtpWebResponse != null && (wex.Response as System.Net.FtpWebResponse).StatusCode == System.Net.FtpStatusCode.ActionNotTakenFileUnavailable)
-                    throw new Interface.FolderMissingException(Strings.FTPBackend.MissingFolderError(req.RequestUri.PathAndQuery, wex.Message), wex);
+                    throw new Interface.FolderMissingException(string.Format(Strings.FTPBackend.MissingFolderError, req.RequestUri.PathAndQuery, wex.Message), wex);
                 else
                     throw;
             }

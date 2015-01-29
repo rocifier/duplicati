@@ -1,6 +1,6 @@
-﻿//  Copyright (C) 2015, The Duplicati Team
+﻿//  Copyright (C) 2014, Kenneth Skovhede
 
-//  http://www.duplicati.com, info@duplicati.com
+//  http://www.hexad.dk, opensource@hexad.dk
 //
 //  This library is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as
@@ -59,7 +59,7 @@ namespace Duplicati.Server.WebServer
             SUPPORTED_METHODS.Add("restore-files", RestoreFiles);
             SUPPORTED_METHODS.Add("read-log", ReadLogData);
             SUPPORTED_METHODS.Add("get-license-data", GetLicenseData);
-            SUPPORTED_METHODS.Add("get-changelog", GetChangelog);
+            //SUPPORTED_METHODS.Add("get-changelog", GetChangelog);
             SUPPORTED_METHODS.Add("get-acknowledgements", GetAcknowledgements);
             SUPPORTED_METHODS.Add("locate-uri-db", LocateUriDb);
             SUPPORTED_METHODS.Add("poll-log-messages", PollLogMessages);
@@ -225,6 +225,7 @@ namespace Duplicati.Server.WebServer
                 });            
         }
 
+        /*
         private void GetChangelog(HttpServer.IHttpRequest request, HttpServer.IHttpResponse response, HttpServer.Sessions.IHttpSession session, BodyWriter bw)
         {
             HttpServer.HttpInput input = request.Method.ToUpper() == "POST" ? request.Form : request.QueryString;
@@ -258,6 +259,7 @@ namespace Duplicati.Server.WebServer
                 }
             }
         }
+         */
 
         private void GetLicenseData(HttpServer.IHttpRequest request, HttpServer.IHttpResponse response, HttpServer.Sessions.IHttpSession session, BodyWriter bw)
         {
@@ -437,7 +439,7 @@ namespace Duplicati.Server.WebServer
                 GenericModules = Serializable.ServerSettings.GenericModules,
                 WebModules = Serializable.ServerSettings.WebModules,
                 ConnectionModules = Serializable.ServerSettings.ConnectionModules,
-                UsingAlternateUpdateURLs = Duplicati.Library.AutoUpdater.AutoUpdateSettings.UsesAlternateURLs,
+                //UsingAlternateUpdateURLs = Duplicati.Library.AutoUpdater.AutoUpdateSettings.UsesAlternateURLs,
                 LogLevels = Enum.GetNames(typeof(Duplicati.Library.Logging.LogMessageType))
             });
         }
@@ -658,7 +660,7 @@ namespace Duplicati.Server.WebServer
                 }
 
                 Program.DataConnection.ApplicationSettings.UpdateSettings(data);
-
+                
                 bw.OutputOK();
             }
             catch (Exception ex)
@@ -681,6 +683,7 @@ namespace Duplicati.Server.WebServer
                 return;
             }
 
+            /*
             var cmdline = Library.Utility.Utility.ParseBool(input["cmdline"].Value, false);
             if (cmdline)
             {
@@ -688,41 +691,42 @@ namespace Duplicati.Server.WebServer
             }
             else
             {
-                var passphrase = input["passphrase"].Value;
-                var ipx = Program.DataConnection.PrepareBackupForExport(bk);
+             */
+            var passphrase = input["passphrase"].Value;
+            var ipx = Program.DataConnection.PrepareBackupForExport(bk);
 
-                byte[] data;
-                using(var ms = new System.IO.MemoryStream())
-                using(var sw = new System.IO.StreamWriter(ms))
-                {
-                    Serializer.SerializeJson(sw, ipx, true);
+            byte[] data;
+            using(var ms = new System.IO.MemoryStream())
+            using(var sw = new System.IO.StreamWriter(ms))
+            {
+                Serializer.SerializeJson(sw, ipx, true);
 
-                    if (!string.IsNullOrWhiteSpace(passphrase))
-                    {
-                        ms.Position = 0;
-                        using(var ms2 = new System.IO.MemoryStream())
-                        using(var m = new Duplicati.Library.Encryption.AESEncryption(passphrase, new Dictionary<string, string>()))
-                        {
-                            m.Encrypt(ms, ms2);
-                            data = ms2.ToArray();
-                        }
-                    }
-                    else
-                        data = ms.ToArray();
-                }
-
-                var filename = Library.Utility.Uri.UrlEncode(bk.Name) + "-duplicati-config.json";
                 if (!string.IsNullOrWhiteSpace(passphrase))
-                    filename += ".aes";
-
-                response.ContentLength = data.Length;
-                response.AddHeader("Content-Disposition", string.Format("attachment; filename={0}", filename));
-                response.ContentType = "application/octet-stream";
-
-                bw.SetOK();
-                response.SendHeaders();
-                response.SendBody(data);
+                {
+                    ms.Position = 0;
+                    using(var ms2 = new System.IO.MemoryStream())
+                    using(var m = new Duplicati.Library.Encryption.AESEncryption(passphrase, new Dictionary<string, string>()))
+                    {
+                        m.Encrypt(ms, ms2);
+                        data = ms2.ToArray();
+                    }
+                }
+                else
+                    data = ms.ToArray();
             }
+
+            var filename = Library.Utility.Uri.UrlEncode(bk.Name) + "-duplicati-config.json";
+            if (!string.IsNullOrWhiteSpace(passphrase))
+                filename += ".aes";
+
+            response.ContentLength = data.Length;
+            response.AddHeader("Content-Disposition", string.Format("attachment; filename={0}", filename));
+            response.ContentType = "application/octet-stream";
+
+            bw.SetOK();
+            response.SendHeaders();
+            response.SendBody(data);
+            //}
         }
 
         private void ImportBackup(HttpServer.IHttpRequest request, HttpServer.IHttpResponse response, HttpServer.Sessions.IHttpSession session, BodyWriter bw)
@@ -962,7 +966,7 @@ namespace Duplicati.Server.WebServer
             try
             {
                 // Add install defaults/overrides, if present
-                var path = System.IO.Path.Combine(Duplicati.Library.AutoUpdater.UpdaterManager.InstalledBaseDir, "newbackup.json");
+                var path = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location), "newbackup.json");
                 if (System.IO.File.Exists(path))
                 {
                     Newtonsoft.Json.Linq.JObject n;
@@ -1006,16 +1010,17 @@ namespace Duplicati.Server.WebServer
             switch (command.ToLowerInvariant())
             {
                 case "check-update":
-                    Program.UpdatePoller.CheckNow();
+                    //Program.UpdatePoller.CheckNow();
                     bw.OutputOK();
                     return;
 
                 case "install-update":
-                    Program.UpdatePoller.InstallUpdate();
+                    //Program.UpdatePoller.InstallUpdate();
                     bw.OutputOK();
                     return;
 
                 case "activate-update":
+                    /*
                     if (Program.WorkThread.CurrentTask != null || Program.WorkThread.CurrentTasks.Count != 0)
                     {
                         ReportError(response, bw, "Cannot activate update while task is running or scheduled");
@@ -1025,6 +1030,8 @@ namespace Duplicati.Server.WebServer
                         Program.UpdatePoller.ActivateUpdate();
                         bw.OutputOK();
                     }
+                    */
+                    bw.OutputOK();
                     return;
 
                 case "pause":

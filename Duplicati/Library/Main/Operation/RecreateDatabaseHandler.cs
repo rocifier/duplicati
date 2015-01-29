@@ -12,7 +12,6 @@ namespace Duplicati.Library.Main.Operation
         private string m_backendurl;
         private Options m_options;
         private RecreateDatabaseResults m_result;
-
         public delegate IEnumerable<KeyValuePair<long, IParsedVolume>> NumberedFilterFilelistDelegate(IEnumerable<IParsedVolume> filelist);
         public delegate void BlockVolumePostProcessor(string volumename,BlockVolumeReader reader);
 
@@ -54,7 +53,7 @@ namespace Duplicati.Library.Main.Operation
         {
             var hashalg = System.Security.Cryptography.HashAlgorithm.Create(m_options.BlockHashAlgorithm);
             if (hashalg == null)
-                throw new Exception(Strings.Foresthash.InvalidHashAlgorithm(m_options.BlockHashAlgorithm));
+                throw new Exception(string.Format(Strings.Foresthash.InvalidHashAlgorithm, m_options.BlockHashAlgorithm));
             var hashsize = hashalg.HashSize / 8;
 
             m_result.OperationProgressUpdater.UpdatePhase(OperationPhase.Recreate_Running);

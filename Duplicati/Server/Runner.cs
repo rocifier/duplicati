@@ -1,6 +1,6 @@
-//  Copyright (C) 2015, The Duplicati Team
+//  Copyright (C) 2011, Kenneth Skovhede
 
-//  http://www.duplicati.com, info@duplicati.com
+//  http://www.hexad.dk, opensource@hexad.dk
 //
 //  This library is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as
@@ -33,6 +33,7 @@ namespace Duplicati.Server
             void Abort();
             void Pause();
             void Resume();
+            void SetSpeedLimit(long uploadlimit, long downloadlimit);
         }
         
         private class RunnerData : IRunnerData
@@ -76,7 +77,14 @@ namespace Duplicati.Server
                 if (c != null)
                     c.Resume();
             }
-            
+
+            public void SetSpeedLimit(long uploadlimit, long downloadlimit)
+            {
+                var c = Controller;
+                if (c != null)
+                    c.SetSpeedLimit(uploadlimit, downloadlimit);
+            }
+
             private readonly long m_taskID;
             
             public RunnerData()
@@ -272,6 +280,7 @@ namespace Duplicati.Server
             #endregion
         }
 
+        /*
         public static string GetCommandLine(IRunnerData data)
         {
             var backup = data.Backup;
@@ -325,7 +334,8 @@ namespace Duplicati.Server
 
             return cmd.ToString();
         }
-        
+        */
+
         public static Duplicati.Library.Interface.IBasicResults Run(IRunnerData data, bool fromQueue)
         {
             var backup = data.Backup;
@@ -688,6 +698,7 @@ namespace Duplicati.Server
                 select (Duplicati.Library.Utility.IFilter)(new Duplicati.Library.Utility.FilterExpression(exp, n.Include)))
                 .Aggregate((a, b) => Duplicati.Library.Utility.FilterExpression.Combine(a, b));
         }
+
     }
 }
 

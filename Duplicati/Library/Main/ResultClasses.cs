@@ -1,6 +1,6 @@
-//  Copyright (C) 2015, The Duplicati Team
+//  Copyright (C) 2011, Kenneth Skovhede
 
-//  http://www.duplicati.com, info@duplicati.com
+//  http://www.hexad.dk, opensource@hexad.dk
 //
 //  This library is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as
@@ -19,6 +19,7 @@ using System;
 using Duplicati.Library.Interface;
 using System.Collections.Generic;
 using Duplicati.Library.Main.Database;
+using System.Threading;
 
 namespace Duplicati.Library.Main
 {
@@ -160,7 +161,7 @@ namespace Duplicati.Library.Main
             
             base.AddBackendEvent(action, type, path, size);
         }
-        
+
         IBackendProgressUpdater IBackendWriter.BackendProgressUpdater { get { return base.BackendProgressUpdater; } }   
     }
     
@@ -170,6 +171,8 @@ namespace Duplicati.Library.Main
         void Resume();
         void Stop();
         void Abort();
+        bool IsPaused();
+        void SetSpeedLimit(long uploadLimit, long downloadLimit);
     }
     
     internal enum TaskControlState
@@ -195,7 +198,8 @@ namespace Duplicati.Library.Main
                 this.Exception = ex;
             }
         }
-    
+
+        public Guid guid = Guid.NewGuid();
         protected LocalDatabase m_db;
         protected readonly BasicResults m_parent;
         protected System.Threading.Thread m_callerThread;
@@ -203,8 +207,15 @@ namespace Duplicati.Library.Main
         protected Queue<DbMessage> m_dbqueue;
                 
         private TaskControlState m_controlState = TaskControlState.Run;
-        private System.Threading.ManualResetEvent m_pauseEvent = new System.Threading.ManualResetEvent(true);
-        
+        protected ManualResetEvent m_pauseEvent = new ManualResetEvent(true);
+
+        public class ThrottleChangedEventArgs : EventArgs
+        {
+            public long Uploadlimit;
+            public long DownloadLimit;
+        }
+        public event EventHandler<ThrottleChangedEventArgs> ThrottleChangedEvent;
+
         private bool m_verboseOutput;
         private bool m_verboseErrors;
         
@@ -502,9 +513,23 @@ namespace Duplicati.Library.Main
         public IBackendWriter BackendWriter { get { return (IBackendWriter)this.BackendStatistics; } }
         
         public event Action<TaskControlState> StateChangedEvent;
-        
+
         /// <summary>
-        /// Request that this task pauses.
+        /// Allows event handlers to respond to the speed limits changing
+        /// </summary>
+        /// <param name="uploadLimit"></param>
+        /// <param name="downloadLimit"></param>
+        public void SetSpeedLimit(long uploadLimit, long downloadLimit)
+        {
+            if (ThrottleChangedEvent != null)
+            {
+                ThrottleChangedEvent(this, new ThrottleChangedEventArgs() { Uploadlimit = uploadLimit, DownloadLimit = downloadLimit });
+                Console.WriteLine("Throttling bandwidth.");
+            }
+        }
+
+        /// <summary>
+        /// Request that THE CURRENT THREAD pauses.
         /// </summary>
         public void Pause()
         {
@@ -515,12 +540,19 @@ namespace Duplicati.Library.Main
                     m_controlState = TaskControlState.Pause;
                 }
             
+            
             if (StateChangedEvent != null)
                 StateChangedEvent(m_controlState);
+
         }
-        
+
+        public bool IsPaused()
+        {
+            return (m_controlState == TaskControlState.Pause);
+        }
+
         /// <summary>
-        /// Request that this task resumes.
+        /// Request that THE CURRENT THREAD resumes.
         /// </summary>
         public void Resume()
         {
@@ -536,7 +568,7 @@ namespace Duplicati.Library.Main
         }
         
         /// <summary>
-        /// Request that this task stops.
+        /// Request that THE CURRENT THREAD stops.
         /// </summary>
         public void Stop() 
         {
@@ -552,7 +584,7 @@ namespace Duplicati.Library.Main
         }
         
         /// <summary>
-        /// Request that this task aborts.
+        /// Request that THE CURRENT THREAD aborts.
         /// </summary>
         public void Abort()
         {
@@ -565,19 +597,13 @@ namespace Duplicati.Library.Main
             if (StateChangedEvent != null)
                 StateChangedEvent(m_controlState);
         }
-        
+
         /// <summary>
-        /// Helper method that the current running task can call to obtain the current state
+        /// Called by a running task to put pause into effect for that thread
         /// </summary>
         public TaskControlState TaskControlRendevouz()
         {
-            // If we are paused, go into pause mode
             m_pauseEvent.WaitOne();
-            
-            // If we are aborted, throw exception
-            if (m_controlState == TaskControlState.Abort)
-                System.Threading.Thread.CurrentThread.Abort();
-            
             return m_controlState;
         }
         

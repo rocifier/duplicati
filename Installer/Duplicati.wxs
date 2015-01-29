@@ -12,14 +12,14 @@
 		<?define SoftwareKeyX86 = "Software\Wow6432Node" ?>
 		<?define ProgramFilesFolder = "ProgramFiles64Folder" ?>
 		<?define ProgramFilesFolderX86 = "ProgramFilesFolder" ?>
-		<?define DisplayName = "Duplicati (x64)" ?>
+		<?define DisplayName = "CBD Backup (x64)" ?>
 	<?else?>
 		<?define SystemFolder = "SystemFolder" ?>
 		<?define SystemFolderX86 = "SystemFolder" ?>
 		<?define SoftwareKey = "Software" ?>
 		<?define SoftwareKeyX86 = "Software" ?>
 		<?define ProgramFilesFolder = "ProgramFilesFolder" ?>
-		<?define DisplayName = "Duplicati" ?>
+		<?define DisplayName = "CBD Backup" ?>
 	<?endif?>
 	
   <Product Id="$(var.ProductCode)" Name="$(var.DisplayName)" Language="1033" Version="$(var.ProductVersion)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.UpgradeCode)">
@@ -50,15 +50,15 @@
         <Control Id="StartWithWindows"
                  Type="CheckBox"
                  X="10" Y="10" Width="100" Height="17"
-                 Text="Start Duplicati when Windows starts" Property="STARTWITHWINDOWS"/>
+                 Text="Start CBD Backup when Windows starts (recommended)" Property="STARTWITHWINDOWS"/>
         <Control Id="DesktopShortcut"
                  Type="CheckBox"
                  X="10" Y="40" Width="100" Height="17"
-                 Text="Start Duplicati when Windows starts" Property="INSTALLDESKTOPSHORTCUT" />
+                 Text="Install desktop shortcut" Property="INSTALLDESKTOPSHORTCUT" />
         <Control Id="QuickLauncShortcut"
                  Type="CheckBox"
                  X="10" Y="70" Width="100" Height="17"
-                 Text="Start Duplicati when Windows starts"  Property="INSTALLQUICKLAUNCHSHORTCUT"/>
+                 Text="Install quick launch shortcut"  Property="INSTALLQUICKLAUNCHSHORTCUT"/>
       </Dialog> -->
       
       <Publish Dialog="ExitDialog"
@@ -73,7 +73,7 @@
       <Directory Id="DesktopFolder" Name="Desktop"/>
 	  
   	  <Directory Id="$(var.ProgramFilesFolder)">
-	    <Directory Id="INSTALLLOCATION" Name="Duplicati" />
+	    <Directory Id="INSTALLLOCATION" Name="CBD Backup" />
 	  </Directory>
 		
     </Directory>
@@ -81,18 +81,18 @@
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLLOCATION" />
 
     <!-- TODO: Make expanded -->
-    <Feature Id="ProductFeature" Title="Duplicati core files" Level="1" Description="Installs the required files for Duplicati." AllowAdvertise="no" TypicalDefault="install" InstallDefault="local" Absent="disallow" ConfigurableDirectory="INSTALLLOCATION" >
-      <Feature Id="DuplicatiDesktopShortCutFeature" Title="Desktop Shortcut" Level="0" Description ="Installs a shortcut to Duplicati on the desktop" Absent="allow" AllowAdvertise="no" TypicalDefault="install" InstallDefault="local">
+    <Feature Id="ProductFeature" Title="Core files" Level="1" Description="Installs the required files for CBD Backup." AllowAdvertise="no" TypicalDefault="install" InstallDefault="local" Absent="disallow" ConfigurableDirectory="INSTALLLOCATION" >
+      <Feature Id="DuplicatiDesktopShortCutFeature" Title="Desktop Shortcut" Level="0" Description ="Installs a shortcut to CBD Backup on the desktop" Absent="allow" AllowAdvertise="no" TypicalDefault="install" InstallDefault="local">
         <ComponentRef Id="DuplicatiDesktopShortcutComponent"/>
       </Feature>
 
-      <Feature Id="DuplicatiProgramFilesShortCutFeature" Title="Program Files Shortcut" Level="1" Description ="Installs a shortcut to Duplicati in the Program Files menu" Absent="allow" AllowAdvertise="no" TypicalDefault="install" InstallDefault="local">
+      <Feature Id="DuplicatiProgramFilesShortCutFeature" Title="Program Files Shortcut" Level="1" Description ="Installs a shortcut to CBD Backup in the Program Files menu" Absent="allow" AllowAdvertise="no" TypicalDefault="install" InstallDefault="local">
         <ComponentRef Id="DuplicatiProgramMenuShortcutComponent"/>
       </Feature>
       <ComponentGroupRef Id="DUPLICATIBIN" />
     </Feature>
     
-    <Feature Id="DuplicatiStartupShortCutFeature" Title="Launch Duplicati at startup" Level="1" Description ="Automatically launches Duplicati when you log on to the computer" Absent="allow" AllowAdvertise="no" TypicalDefault="install" InstallDefault="local">
+    <Feature Id="DuplicatiStartupShortCutFeature" Title="Launch CBD Backup at startup" Level="1" Description ="Automatically launches CBD Backup when you log on to the computer" Absent="allow" AllowAdvertise="no" TypicalDefault="install" InstallDefault="local">
       <ComponentRef Id="StartupMenuItem"/>
     </Feature>
 
@@ -130,7 +130,7 @@
     </Feature> -->
 
     <!-- Launch duplicati setup -->
-    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch Duplicati now" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch CBD Backup now" />
     <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
     <CustomAction Id="LaunchApplication" FileKey="file_FILE_DUPLICATI_MAIN_EXE" Impersonate="yes" ExeCommand="" Return="asyncNoWait" />
     

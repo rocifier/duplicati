@@ -1,6 +1,6 @@
-﻿//  Copyright (C) 2015, The Duplicati Team
+﻿//  Copyright (C) 2014, Kenneth Skovhede
 
-//  http://www.duplicati.com, info@duplicati.com
+//  http://www.hexad.dk, opensource@hexad.dk
 //
 //  This library is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as
@@ -76,7 +76,7 @@ namespace Duplicati.Library.Main.Database
             using(var rd = cmd.ExecuteReader(sql, it.ToArray()))
                 while (rd.Read())
                 {
-                    var v = dict[rd.GetInt64(0)];
+                    var v = dict[Convert.ToInt64(rd.GetValue(0))];
                     yield return new ListResultFileset() {
                         Version = v,
                         Time = filesets[v].Value
@@ -127,8 +127,8 @@ namespace Duplicati.Library.Main.Database
             using(var rd = cmd.ExecuteReader(sql, it.ToArray()))
                 while (rd.Read())
                     yield return new ListResultRemoteLog() {
-                        Timestamp = ParseFromEpochSeconds(rd.GetInt64(0)),
-                        Message = rd.GetString(1)
+                        Timestamp = ParseFromEpochSeconds(Convert.ToInt64(rd.GetValue(0))),
+                        Message = Convert.ToString(rd.GetValue(1))
                     };
         }
 

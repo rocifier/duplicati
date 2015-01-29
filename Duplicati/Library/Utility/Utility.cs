@@ -1,6 +1,6 @@
 #region Disclaimer / License
-// Copyright (C) 2015, The Duplicati Team
-// http://www.duplicati.com, info@duplicati.com
+// Copyright (C) 2011, Kenneth Skovhede
+// http://www.hexad.dk, opensource@hexad.dk
 // 
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -32,7 +32,7 @@ namespace Duplicati.Library.Utility
         /// <summary>
         /// Size of buffers for copying stream
         /// </summary>
-        public static long DEFAULT_BUFFER_SIZE = 64 * 1024;
+        public static long DEFAULT_BUFFER_SIZE = 512 * 1024;
 
         /// <summary>
         /// A value indicating if the current process is running in 64bit mode
@@ -539,15 +539,15 @@ namespace Duplicati.Library.Utility
         public static string FormatSizeString(long size)
         {
             if (size >= 1024 * 1024 * 1024 * 1024L)
-                return Strings.Utility.FormatStringTB((double)size / (1024 * 1024 * 1024 * 1024L));
+                return string.Format(Strings.Utility.FormatStringTB, (double)size / (1024 * 1024 * 1024 * 1024L));
             else if (size >= 1024 * 1024 * 1024)
-                return Strings.Utility.FormatStringGB((double)size / (1024 * 1024 * 1024));
+                return string.Format(Strings.Utility.FormatStringGB, (double)size / (1024 * 1024 * 1024));
             else if (size >= 1024 * 1024)
-                return Strings.Utility.FormatStringMB((double)size / (1024 * 1024));
+                return string.Format(Strings.Utility.FormatStringMB, (double)size / (1024 * 1024));
             else if (size >= 1024)
-                return Strings.Utility.FormatStringKB((double)size / 1024);
+                return string.Format(Strings.Utility.FormatStringKB, (double)size / 1024);
             else
-                return Strings.Utility.FormatStringB(size);
+                return string.Format(Strings.Utility.FormatStringB, size);
         }
 
         public static System.Threading.ThreadPriority ParsePriority(string value)
@@ -935,7 +935,7 @@ namespace Duplicati.Library.Utility
         {
             DateTime dt;
             if (!DateTime.TryParseExact(str, "yyyyMMdd'T'HHmmssK", null, System.Globalization.DateTimeStyles.AssumeUniversal, out dt))
-                throw new Exception(Strings.Utility.InvalidDateError(str));
+                throw new Exception(string.Format(Strings.Utility.InvalidDateError, str));
 
             return dt;
         }

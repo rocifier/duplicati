@@ -9,7 +9,9 @@ namespace Duplicati.GUI.TrayIcon
     public static class Program
     {
         public static HttpServerConnection Connection;
-    
+
+        private const string AUTOUPDATE_APPCAST = "https://s3.amazonaws.com/cbd-backup-us-east-1/AutoUpdates/appcast.xml";
+        private const string AUTOUPDATE_APPCAST_32BIT = "https://s3.amazonaws.com/cbd-backup-us-east-1/AutoUpdates/appcast32.xml";
         private const string TOOLKIT_OPTION = "toolkit";
         private const string TOOLKIT_WINDOWS_FORMS = "winforms";
         private const string TOOLKIT_GTK = "gtk";
@@ -51,19 +53,25 @@ namespace Duplicati.GUI.TrayIcon
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
+        /*
         [STAThread]
         public static int Main(string[] args)
         {
             Duplicati.Library.AutoUpdater.UpdaterManager.RequiresRespawn = true;
             return Duplicati.Library.AutoUpdater.UpdaterManager.RunFromMostRecent(typeof(Program).GetMethod("RealMain"), args, Duplicati.Library.AutoUpdater.AutoUpdateStrategy.Never);
         }
-        
-        public static void RealMain(string[] _args)
-        {
-            List<string> args = new List<string>(_args);
-            Dictionary<string, string> options = Duplicati.Library.Utility.CommandLineParser.ExtractOptions(args);
+         */
 
-            foreach (string s in args)
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        public static int Main(string[] args)
+        {
+            List<string> _args = new List<string>(args);
+            Dictionary<string, string> options = Duplicati.Library.Utility.CommandLineParser.ExtractOptions(_args);
+
+            foreach (string s in _args)
                 if (
                     s.Equals("help", StringComparison.InvariantCultureIgnoreCase) ||
                     s.Equals("/help", StringComparison.InvariantCultureIgnoreCase) ||
@@ -85,7 +93,7 @@ namespace Duplicati.GUI.TrayIcon
                 foreach (Library.Interface.ICommandLineArgument arg in Duplicati.Server.Program.SupportedCommands)
                     Console.WriteLine("--{0}: {1}", arg.Name, arg.LongDescription);
 
-                return;
+                return 0;
             }            
             
             options.TryGetValue(BROWSER_COMMAND_OPTION, out _browser_command);
@@ -109,6 +117,22 @@ namespace Duplicati.GUI.TrayIcon
                     toolkit = GetDefaultToolKit();
             }
 
+            // Auto updates
+            try
+            {
+                if (Duplicati.Library.Utility.Utility.Is64BitProcess)
+                {
+                    AutoUpdaterDotNET.AutoUpdater.Start(AUTOUPDATE_APPCAST);
+                }
+                else
+                {
+                    AutoUpdaterDotNET.AutoUpdater.Start(AUTOUPDATE_APPCAST_32BIT);
+                }
+            }
+            catch
+            {
+            }
+
             HostedInstanceKeeper hosted = null;
             bool openui = false;
             string password = null;
@@ -117,11 +141,11 @@ namespace Duplicati.GUI.TrayIcon
             {
                 try
                 {
-                    hosted = new HostedInstanceKeeper(_args);
+                    hosted = new HostedInstanceKeeper(args);
                 }
                 catch (Server.SingleInstance.MultipleInstanceException)
                 {
-                    return;
+                    return 1;
                 }
 
                 // We have a hosted server, if this is the first run, 
@@ -185,7 +209,7 @@ namespace Duplicati.GUI.TrayIcon
                         if (hosted != null)
                             hosted.InstanceShutdown += shutdownEvent;
 
-                        tk.Init(_args);
+                        tk.Init(args);
 
                         // Make sure that the server shutdown does not access the tray-icon,
                         // as it would be disposed by now
@@ -194,6 +218,7 @@ namespace Duplicati.GUI.TrayIcon
                     }
                 }
             }
+            return 0;
         }
   
         private static TrayIconBase RunTrayIcon(string toolkit)

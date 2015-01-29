@@ -1,6 +1,6 @@
 #region Disclaimer / License
-// Copyright (C) 2015, The Duplicati Team
-// http://www.duplicati.com, info@duplicati.com
+// Copyright (C) 2011, Kenneth Skovhede
+// http://www.hexad.dk, opensource@hexad.dk
 // 
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -142,7 +142,7 @@ namespace Duplicati.CommandLine
                 foreach (string internaloption in Library.Main.Options.InternalOptions)
                     if (options.ContainsKey(internaloption))
                     {
-                        Console.WriteLine(Strings.Program.InternalOptionUsedError(internaloption));
+                        Console.WriteLine(Strings.Program.InternalOptionUsedError, internaloption);
                         return 200;
                     }
                 
@@ -284,13 +284,13 @@ namespace Duplicati.CommandLine
                 }
                 else
                 {
-                    Console.Error.WriteLine(Strings.Program.UnhandledException(ex.ToString()));
+                    Console.Error.WriteLine(Strings.Program.UnhandledException, ex.ToString());
 
                     while (ex.InnerException != null)
                     {
                         ex = ex.InnerException;
                         Console.Error.WriteLine();
-                        Console.Error.WriteLine(Strings.Program.UnhandledInnerException(ex.ToString()));
+                        Console.Error.WriteLine(Strings.Program.UnhandledInnerException, ex.ToString());
                     }
                 }
 
@@ -365,7 +365,7 @@ namespace Duplicati.CommandLine
             }
             catch (Exception e)
             {
-                Console.WriteLine(Strings.Program.FailedToParseParametersFileError(filename, e.Message));
+                Console.WriteLine(Strings.Program.FailedToParseParametersFileError, filename, e.Message);
                 return false;
             }
         }

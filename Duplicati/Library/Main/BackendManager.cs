@@ -341,7 +341,8 @@ namespace Duplicati.Library.Main
         private System.Threading.Thread m_thread;
         private BasicResults m_taskControl;
 		private DatabaseCollector m_db;
-                
+
+        public BasicResults TaskControl { get { return m_taskControl; } }
         public string BackendUrl { get { return m_backendurl; } }
         
         public bool HasDied { get { return m_lastException != null; } }
@@ -590,8 +591,6 @@ namespace Duplicati.Library.Main
         
         private void HandleProgress(long pg)
         {
-            // TODO: Should we pause here as well?
-            // It might give annoying timeouts for transfers
             if (m_taskControl != null)
                 m_taskControl.TaskControlRendevouz();
 
@@ -622,9 +621,21 @@ namespace Duplicati.Library.Main
             if (m_backend is Library.Interface.IStreamingBackend && !m_options.DisableStreamingTransfers)
             {
                 using (var fs = System.IO.File.OpenRead(item.LocalFilename))
-                using (var ts = new ThrottledStream(fs, m_options.MaxUploadPrSecond, m_options.MaxDownloadPrSecond))
-                using (var pgs = new Library.Utility.ProgressReportingStream(ts, item.Size, HandleProgress))
-                    ((Library.Interface.IStreamingBackend)m_backend).Put(item.RemoteFilename, pgs);
+                {
+                    using (var ts = new ThrottledStream(fs, m_options.GetMaxUploadPrSecond(), m_options.GetMaxDownloadPrSecond()))
+                    {
+                        EventHandler<BasicResults.ThrottleChangedEventArgs> handler = (object o, BasicResults.ThrottleChangedEventArgs args) => {
+                            ts.ReadSpeed = args.Uploadlimit;
+                            ts.WriteSpeed = args.DownloadLimit;
+                        };
+                        m_taskControl.ThrottleChangedEvent += handler;
+                        using (var pgs = new Library.Utility.ProgressReportingStream(ts, item.Size, HandleProgress))
+                        {
+                            ((Library.Interface.IStreamingBackend)m_backend).Put(item.RemoteFilename, pgs);
+                        }
+                        m_taskControl.ThrottleChangedEvent -= handler;
+                    }
+                }
             }
             else
                 m_backend.Put(item.RemoteFilename, item.LocalFilename);
@@ -662,9 +673,22 @@ namespace Duplicati.Library.Main
                 if (m_backend is Library.Interface.IStreamingBackend && !m_options.DisableStreamingTransfers)
                 {
                     using (var fs = System.IO.File.OpenWrite(tmpfile))
-                    using (var ts = new ThrottledStream(fs, m_options.MaxUploadPrSecond, m_options.MaxDownloadPrSecond))
-                    using (var pgs = new Library.Utility.ProgressReportingStream(ts, item.Size, HandleProgress))
-                        ((Library.Interface.IStreamingBackend)m_backend).Get(item.RemoteFilename, pgs);
+                    {
+                        using (var ts = new ThrottledStream(fs, m_options.GetMaxUploadPrSecond(), m_options.GetMaxDownloadPrSecond()))
+                        {
+                            EventHandler<BasicResults.ThrottleChangedEventArgs> handler = (object o, BasicResults.ThrottleChangedEventArgs args) =>
+                            {
+                                ts.ReadSpeed = args.Uploadlimit;
+                                ts.WriteSpeed = args.DownloadLimit;
+                            };
+                            m_taskControl.ThrottleChangedEvent += handler;
+                            using (var pgs = new Library.Utility.ProgressReportingStream(ts, item.Size, HandleProgress))
+                            {
+                                ((Library.Interface.IStreamingBackend)m_backend).Get(item.RemoteFilename, pgs);
+                            }
+                            m_taskControl.ThrottleChangedEvent -= handler;
+                        }
+                    }
                 }
                 else
                     m_backend.Get(item.RemoteFilename, tmpfile);
@@ -681,7 +705,7 @@ namespace Duplicati.Library.Main
                     if (item.Size >= 0)
                     {
                         if (nl != item.Size)
-                            throw new Exception(Strings.Controller.DownloadedFileSizeError(item.RemoteFilename, nl, item.Size));
+                            throw new Exception(string.Format(Strings.Controller.DownloadedFileSizeError, item.RemoteFilename, nl, item.Size));
                     }
                     else
                     	item.Size = nl;
@@ -690,7 +714,7 @@ namespace Duplicati.Library.Main
                     if (!string.IsNullOrEmpty(item.Hash))
                     {
                         if (nh != item.Hash)
-                            throw new HashMismathcException(Strings.Controller.HashMismatchError(tmpfile, item.Hash, nh));
+                            throw new HashMismathcException(string.Format(Strings.Controller.HashMismatchError, tmpfile, item.Hash, nh));
                     }
                     else
                     	item.Hash = nh;

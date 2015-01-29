@@ -27,7 +27,7 @@ namespace Duplicati.Library.Main.Operation
         private DeleteResults m_result;
         protected string m_backendurl;
         protected Options m_options;
-    
+
 		public DeleteHandler(string backend, Options options, DeleteResults result)
         {
             m_backendurl = backend;

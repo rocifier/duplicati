@@ -1,6 +1,7 @@
-We would like to thank all contributors who made Duplicati what it is today.
+This project is based on the Duplicati project from the following developers, for whom we owe a great deal of thanks:
 
 Software Development:
+  Kenneth Skovhede
   Livio Bertacco
   Daniel Halan
   Birunthan Mohanathas
@@ -10,15 +11,3 @@ Software Development:
   Don Lockhart
   Sebastian Fahrenholz
   Malte Neumann
-  
-Translations:
-  Brazilian, pt-BR: Gabriell Hahmann
-  Chinese, zh-CN: Born Kanas
-  Danish, da-DK: Kenneth Skovhede
-  French, fr-FR: Matthieu Weber
-  German, de-DE: Ernst Mair, Mathias Block, DooM ElHado, Leo nowhere
-  Italian, it-IT: Riccardo Stoppani
-  Russian, ru-RU: Philip Torchinsky, Semonix
-  Spanish, es-ES: JosepV
-
-A special thanks to the many users who let us know how they are using Duplicati, ask for new features, test development builds and thus help us improve Duplicati further.

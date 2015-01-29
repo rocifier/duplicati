@@ -1,6 +1,6 @@
 #region Disclaimer / License
-// Copyright (C) 2015, The Duplicati Team
-// http://www.duplicati.com, info@duplicati.com
+// Copyright (C) 2011, Kenneth Skovhede
+// http://www.hexad.dk, opensource@hexad.dk
 // 
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -97,7 +97,7 @@ namespace Duplicati.Library.Encryption
             catch (System.Security.Cryptography.CryptographicException cex)
             {
                 //Better error message than "Padding is invalid and cannot be removed" :)
-                throw new System.Security.Cryptography.CryptographicException(Strings.EncryptionBase.DecryptionError(cex.Message), cex);
+                throw new System.Security.Cryptography.CryptographicException(string.Format(Strings.EncryptionBase.DecryptionError, cex.Message), cex);
             }
         }
 

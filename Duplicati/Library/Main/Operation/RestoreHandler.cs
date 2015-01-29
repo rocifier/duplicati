@@ -111,14 +111,14 @@ namespace Duplicati.Library.Main.Operation
                     var blockhasher = System.Security.Cryptography.HashAlgorithm.Create(m_options.BlockHashAlgorithm);
                     var filehasher = System.Security.Cryptography.HashAlgorithm.Create(m_options.FileHashAlgorithm);
                     if (blockhasher == null)
-                        throw new Exception(Strings.Foresthash.InvalidHashAlgorithm(m_options.BlockHashAlgorithm));
+                        throw new Exception(string.Format(Strings.Foresthash.InvalidHashAlgorithm, m_options.BlockHashAlgorithm));
                     if (!blockhasher.CanReuseTransform)
-                        throw new Exception(Strings.Foresthash.InvalidCryptoSystem(m_options.BlockHashAlgorithm));
+                        throw new Exception(string.Format(Strings.Foresthash.InvalidCryptoSystem, m_options.BlockHashAlgorithm));
     
                     if (filehasher == null)
-                        throw new Exception(Strings.Foresthash.InvalidHashAlgorithm(m_options.FileHashAlgorithm));
+                        throw new Exception(string.Format(Strings.Foresthash.InvalidHashAlgorithm, m_options.FileHashAlgorithm));
                     if (!filehasher.CanReuseTransform)
-                        throw new Exception(Strings.Foresthash.InvalidCryptoSystem(m_options.FileHashAlgorithm));
+                        throw new Exception(string.Format(Strings.Foresthash.InvalidCryptoSystem, m_options.FileHashAlgorithm));
     
                     bool first = true;
                     RecreateDatabaseHandler.BlockVolumePostProcessor localpatcher =
@@ -184,9 +184,6 @@ namespace Duplicati.Library.Main.Operation
         {
             var blocksize = options.Blocksize;
             var updateCounter = 0L;
-            var fullblockverification = options.FullBlockVerification;
-            var blockhasher = fullblockverification ? System.Security.Cryptography.HashAlgorithm.Create(options.BlockHashAlgorithm) : null;
-
             using(var blockmarker = database.CreateBlockMarker())
             using(var volumekeeper = database.GetMissingBlockData(blocks))
             {
@@ -219,23 +216,10 @@ namespace Duplicati.Library.Main.Operation
                                     var size = blocks.ReadBlock(targetblock.Key, blockbuffer);
                                     if (targetblock.Size == size)
                                     {
-                                        var valid = !fullblockverification;
-                                        if (!valid)
-                                        {
-                                            blockhasher.Initialize();
-                                            var key = Convert.ToBase64String(blockhasher.ComputeHash(blockbuffer, 0, size));
-                                            if (targetblock.Key == key)
-                                                valid = true;
-                                            else
-                                                result.AddWarning(string.Format("Invalid block detected for {0}, expected hash: {1}, actual hash: {2}", targetpath, targetblock.Key, key), null);
-                                        }
-
-                                        if (valid)
-                                        {
-                                            file.Write(blockbuffer, 0, size);
-                                            blockmarker.SetBlockRestored(restorelist.FileID, targetblock.Offset / blocksize, targetblock.Key, size, false);
-                                        }
+                                        file.Write(blockbuffer, 0, size);
+                                        blockmarker.SetBlockRestored(restorelist.FileID, targetblock.Offset / blocksize, targetblock.Key, size, false);
                                     }   
+                                    
                                 }
                             
                             if (updateCounter++ % 20 == 0)
@@ -263,17 +247,6 @@ namespace Duplicati.Library.Main.Operation
                         {               
                             try
                             {
-                                // TODO: We can end up in a situation where the file is not created yet,
-                                // but we get the metadata anyway.
-                                // This could be handled by creating an empty file and applying metadata to it
-                                // Another solution is to store the metadata stream in a temporary
-                                // file, and then applying the metadata when/before verifying
-
-                                // TODO: Another issue is that we may end up writing to a file after applying
-                                // metadata, which will change the file timestamp
-                                // This can be solved by keeping a table with timestamps read from
-                                // metadata and then applying this when verifying the files
-
                                 var folderpath = m_systemIO.PathGetDirectoryName(targetpath);
                                 if (!options.Dryrun && !m_systemIO.DirectoryExists(folderpath))
                                 {
@@ -325,14 +298,14 @@ namespace Duplicati.Library.Main.Operation
                 var blockhasher = System.Security.Cryptography.HashAlgorithm.Create(m_options.BlockHashAlgorithm);
                 var filehasher = System.Security.Cryptography.HashAlgorithm.Create(m_options.FileHashAlgorithm);
                 if (blockhasher == null)
-                    throw new Exception(Strings.Foresthash.InvalidHashAlgorithm(m_options.BlockHashAlgorithm));
+                    throw new Exception(string.Format(Strings.Foresthash.InvalidHashAlgorithm, m_options.BlockHashAlgorithm));
                 if (!blockhasher.CanReuseTransform)
-                    throw new Exception(Strings.Foresthash.InvalidCryptoSystem(m_options.BlockHashAlgorithm));
+                    throw new Exception(string.Format(Strings.Foresthash.InvalidCryptoSystem, m_options.BlockHashAlgorithm));
 
                 if (filehasher == null)
-                    throw new Exception(Strings.Foresthash.InvalidHashAlgorithm(m_options.FileHashAlgorithm));
+                    throw new Exception(string.Format(Strings.Foresthash.InvalidHashAlgorithm, m_options.FileHashAlgorithm));
                 if (!filehasher.CanReuseTransform)
-                    throw new Exception(Strings.Foresthash.InvalidCryptoSystem(m_options.FileHashAlgorithm));
+                    throw new Exception(string.Format(Strings.Foresthash.InvalidCryptoSystem, m_options.FileHashAlgorithm));
 
                 if (!m_options.NoBackendverification)
                 {

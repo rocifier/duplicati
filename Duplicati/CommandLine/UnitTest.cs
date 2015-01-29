@@ -1,6 +1,6 @@
 #region Disclaimer / License
-// Copyright (C) 2015, The Duplicati Team
-// http://www.duplicati.com, info@duplicati.com
+// Copyright (C) 2011, Kenneth Skovhede
+// http://www.hexad.dk, opensource@hexad.dk
 // 
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -134,6 +134,8 @@ namespace Duplicati.CommandLine
             if (!options.ContainsKey("prefix"))
                 options["prefix"] = "duplicati_unittest";
 
+            //This would break the test, because the data is not modified the normal way
+            options["disable-filetime-check"] = "true";
             //We want all messages in the log
             options["log-level"] = LogMessageType.Profiling.ToString();
             //We cannot rely on USN numbering, but we can use USN enumeration
@@ -173,8 +175,6 @@ namespace Duplicati.CommandLine
                 skipverify = true;
                 options.Remove("unittest-skip-verify");
             }
-
-            var verifymetadata = !Utility.ParseBoolOption(options, "skip-metadata");
             
             using(new Timer("Total unittest"))
             using(TempFolder tf = new TempFolder())
@@ -346,7 +346,7 @@ namespace Duplicati.CommandLine
                                     {
                                         //Call function to simplify profiling
                                         Console.WriteLine("Verifying partial restore of: " + folders[i]);
-                                        VerifyPartialRestore(folders[i], testfiles, actualfolders, ptf, folders[0], verifymetadata);
+                                        VerifyPartialRestore(folders[i], testfiles, actualfolders, ptf, folders[0]);
                                     }
                                 }
                             }
@@ -360,7 +360,7 @@ namespace Duplicati.CommandLine
                                 {
                                     //Call function to simplify profiling
                                     Console.WriteLine("Verifying the copy: " + folders[i]);
-                                    VerifyFullRestore(folders[i], actualfolders, new string[] { ttf }, verifymetadata);
+                                    VerifyFullRestore(folders[i], actualfolders, new string[] { ttf });
                                 }
                             }
                         }
@@ -397,7 +397,7 @@ namespace Duplicati.CommandLine
         		Console.WriteLine("Unittest completed successfully - Have some cake!");            	
         }
 
-        private static void VerifyPartialRestore(string source, IEnumerable<string> testfiles, string[] actualfolders, string tempfolder, string rootfolder, bool verifymetadata)
+        private static void VerifyPartialRestore(string source, IEnumerable<string> testfiles, string[] actualfolders, string tempfolder, string rootfolder)
         {
             using (new Timer("Verification of partial restore from " + source))
                 foreach (string s in testfiles)
@@ -431,7 +431,7 @@ namespace Duplicati.CommandLine
                             throw new Exception("Unittest is broken");
                         }
 
-                        if (!CompareFiles(sourcename, restoredname, s, verifymetadata))
+                        if (!CompareFiles(sourcename, restoredname, s))
                         {
                             Log.WriteMessage("Partial restore file differs: " + s, LogMessageType.Error);
                             Console.WriteLine("Partial restore file differs: " + s);
@@ -440,12 +440,12 @@ namespace Duplicati.CommandLine
                 }
         }
 
-        private static void VerifyFullRestore(string source, string[] actualfolders, string[] restorefoldernames, bool verifymetadata)
+        private static void VerifyFullRestore(string source, string[] actualfolders, string[] restorefoldernames)
         {
             using (new Timer("Verification of " + source))
             {
                 for (int j = 0; j < actualfolders.Length; j++)
-                    VerifyDir(actualfolders[j], restorefoldernames[j], verifymetadata);
+                    VerifyDir(actualfolders[j], restorefoldernames[j]);
             }
         }
 
@@ -497,7 +497,7 @@ namespace Duplicati.CommandLine
         /// </summary>
         /// <param name="f1">One folder</param>
         /// <param name="f2">Another folder</param>
-        private static void VerifyDir(string f1, string f2, bool verifymetadata)
+        private static void VerifyDir(string f1, string f2)
         {
             f1 = Utility.AppendDirSeparator(f1);
             f2 = Utility.AppendDirSeparator(f2);
@@ -540,7 +540,7 @@ namespace Duplicati.CommandLine
                 else
                 {
                     files2.RemoveAt(ix);
-                    if (!CompareFiles(s, target, relpath, verifymetadata))
+                    if (!CompareFiles(s, target, relpath))
                     {
                         Log.WriteMessage("File differs: " + relpath, LogMessageType.Error);
                         Console.WriteLine("File differs: " + relpath);
@@ -562,7 +562,7 @@ namespace Duplicati.CommandLine
         /// <param name="f2">Another file</param>
         /// <param name="display">File display name</param>
         /// <returns>True if they are equal, false otherwise</returns>
-        private static bool CompareFiles(string f1, string f2, string display, bool verifymetadata)
+        private static bool CompareFiles(string f1, string f2, string display)
         {
             using (System.IO.FileStream fs1 = System.IO.File.OpenRead(f1))
             using (System.IO.FileStream fs2 = System.IO.File.OpenRead(f2))
@@ -584,22 +584,6 @@ namespace Duplicati.CommandLine
                         }
                 }
 
-            if (verifymetadata)
-            {
-                if (System.IO.File.GetLastWriteTime(f1) != System.IO.File.GetLastWriteTime(f2))
-                {
-                    Log.WriteMessage("Mismatch in lastmodified for " + f2 + ", " + System.IO.File.GetLastWriteTimeUtc(f1) + " vs. " + System.IO.File.GetLastWriteTimeUtc(f2), LogMessageType.Warning);
-                    Console.WriteLine("Mismatch in lastmodified for " + f2 + ", " + System.IO.File.GetLastWriteTimeUtc(f1) + " vs. " + System.IO.File.GetLastWriteTimeUtc(f2));
-                }
-
-                if (System.IO.File.GetCreationTimeUtc(f1) != System.IO.File.GetCreationTimeUtc(f2))
-                {
-                    Log.WriteMessage("Mismatch in create-time for " + f2 + ", " + System.IO.File.GetCreationTimeUtc(f1) + " vs. " + System.IO.File.GetCreationTimeUtc(f2), LogMessageType.Warning);
-                    Console.WriteLine("Mismatch in create-time for " + f2 + ", " + System.IO.File.GetCreationTimeUtc(f1) + " vs. " + System.IO.File.GetCreationTimeUtc(f2));
-                }
-            }
-
-
             return true;
         }
         
@@ -613,21 +597,11 @@ namespace Duplicati.CommandLine
             if (!System.IO.Directory.Exists(dest))
                 System.IO.Directory.CreateDirectory(dest);
             
-            foreach(var file in System.IO.Directory.GetFiles(source))
-            {
-                var t = System.IO.Path.Combine(dest, System.IO.Path.GetFileName(file));
-                System.IO.File.Copy(file, t, false);
-                System.IO.File.SetCreationTimeUtc(t, System.IO.File.GetCreationTimeUtc(file));
-                System.IO.File.SetLastWriteTimeUtc(t, System.IO.File.GetLastWriteTimeUtc(file));
-            }
+            foreach (var file in System.IO.Directory.GetFiles(source))
+                System.IO.File.Copy(file, System.IO.Path.Combine(dest, System.IO.Path.GetFileName(file)), false);
             
-            foreach(var folder in System.IO.Directory.GetDirectories(source))
-            {
-                var t = System.IO.Path.Combine(dest, System.IO.Path.GetFileName(folder));
-                CopyDirectoryRecursive(folder, t);
-                System.IO.Directory.SetCreationTimeUtc(t, System.IO.Directory.GetCreationTimeUtc(folder));
-                System.IO.Directory.SetLastWriteTimeUtc(t, System.IO.Directory.GetLastWriteTimeUtc(folder));
-            }
+            foreach (var folder in System.IO.Directory.GetDirectories(source))
+                CopyDirectoryRecursive(folder, System.IO.Path.Combine(dest, System.IO.Path.GetFileName(folder)));
         }        
     }
 }

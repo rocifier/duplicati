@@ -1,7 +1,7 @@
 #region "Disclaimer / License"
-//  Copyright (C) 2015, The Duplicati Team
+//  Copyright (C) 2011, Kenneth Skovhede
 
-//  http://www.duplicati.com, info@duplicati.com
+//  http://www.hexad.dk, opensource@hexad.dk
 //  
 //  This library is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as
@@ -33,7 +33,7 @@ namespace Duplicati.Server.Serializable
         {
             get { return EnumConverter.Convert<LiveControlState>(Program.LiveControl.State); }
         }
-
+        /*
         public string UpdatedVersion 
         { 
             get 
@@ -52,12 +52,12 @@ namespace Duplicati.Server.Serializable
                 return u.Displayname; 
             }
         }
+        */
+        //public UpdatePollerStates UpdaterState { get { return Program.UpdatePoller.ThreadState; } }
 
-        public UpdatePollerStates UpdaterState { get { return Program.UpdatePoller.ThreadState; } }
+        //public bool UpdateReady { get { return Duplicati.Library.AutoUpdater.UpdaterManager.HasUpdateInstalled; } }
 
-        public bool UpdateReady { get { return Duplicati.Library.AutoUpdater.UpdaterManager.HasUpdateInstalled; } }
-
-        public double UpdateDownloadProgress { get { return Program.UpdatePoller.DownloadProgess; } }
+        //public double UpdateDownloadProgress { get { return Program.UpdatePoller.DownloadProgess; } }
 
 
         public Tuple<long, string> ActiveTask

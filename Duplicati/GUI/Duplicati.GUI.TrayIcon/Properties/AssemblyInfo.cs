@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Duplicati.GUI.TrayIcon")]
+[assembly: AssemblyTitle("CBDBackup")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("HexaD")]
-[assembly: AssemblyProduct("Duplicati.GUI.TrayIcon")]
-[assembly: AssemblyCopyright("LGPL, Copyright © HexaD 2014")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("CBD Backup")]
+[assembly: AssemblyCopyright("LGPL")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

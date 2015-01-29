@@ -29,7 +29,7 @@ namespace Duplicati.Library.Main.Operation
         protected string m_backendurl;
         protected Options m_options;
         protected CompactResults m_result;
-        
+
 		public CompactHandler(string backend, Options options, CompactResults result)
 		{
             m_backendurl = backend;
@@ -51,7 +51,7 @@ namespace Duplicati.Library.Main.Operation
                 var changed = DoCompact(db, false, tr);
                 
                 if (changed && m_options.UploadVerificationFile)
-                    FilelistProcessor.UploadVerificationFile(m_backendurl, m_options, m_result.BackendWriter, db, null);
+                    FilelistProcessor.UploadVerificationFile(m_backendurl, m_options, m_result.BackendWriter, db, tr);
                 
                 if (!m_options.Dryrun)
                 {
