@@ -396,7 +396,6 @@
   <data name="HardlinkpolicyLong" xml:space="preserve">
     <value>Using this option to handle hardlinks (only works on Linux/OSX). The "{0}" option will record a hardlink ID for each hardlink to avoid storing hardlinked paths multiple times. The option "{1}" will ignore hardlink information, and treat each hardlink as a unique path. The option "{2}" will ignore all hardlinks with more than one link.</value>
   </data>
-  
   <data name="ExcludefilesattributesShort" xml:space="preserve">
     <value>Exclude files by attribute</value>
   </data>
@@ -492,25 +491,25 @@
   </data>
   <data name="ThresholdShort" xml:space="preserve">
     <value>The maximum wasted space in percent</value>
-  </data>  
+  </data>
   <data name="DryrunLong" xml:space="preserve">
     <value>This option can be used to experiment with different settings and observe the outcome without changing actual files.</value>
   </data>
   <data name="DryrunShort" xml:space="preserve">
     <value>Does not perform any modifications</value>
-  </data> 
+  </data>
   <data name="BlockhashalgorithmLong" xml:space="preserve">
     <value>This is a very advanced option! This option can be used to select a block hash algorithm with smaller or larger hash size, for performance or storage space reasons.</value>
   </data>
   <data name="BlockhashalgorithmShort" xml:space="preserve">
     <value>The hash algorithm used on blocks</value>
-  </data> 
+  </data>
   <data name="FilehashalgorithmLong" xml:space="preserve">
     <value>This is a very advanced option! This option can be used to select a file hash algorithm with smaller or larger hash size, for performance or storage space reasons.</value>
   </data>
   <data name="FilehashalgorithmShort" xml:space="preserve">
     <value>The hash algorithm used on files</value>
-  </data> 
+  </data>
   <data name="NoautocompactLong" xml:space="preserve">
     <value>If a large number of small files are detected during a backup, or wasted space is found after deleting backups, the remote data will be compacted. Use this option to disable such automatic compacting and only compact when running the compact command.</value>
   </data>
@@ -573,13 +572,13 @@
   </data>
   <data name="VerboseLong" xml:space="preserve">
     <value>Use this option to increase the amount of output generated when running an option. Generally this option will produce a line for each file processed.</value>
-  </data>  
+  </data>
   <data name="UploadverificationfileShort" xml:space="preserve">
     <value>Determine if verification files are uploaded</value>
   </data>
   <data name="UploadverificationfileLong" xml:space="preserve">
     <value>Use this option to upload a verification file after changing the remote storage. The file is not encrypted and contains the size and SHA256 hashes of all the remote files and can be used to verify the integrity of the files.</value>
-  </data>  
+  </data>
   <data name="BackendtestsamplesShort" xml:space="preserve">
     <value>The number of samples to test after a backup</value>
   </data>
@@ -597,11 +596,17 @@
   </data>
   <data name="FilereadbuffersizeLong" xml:space="preserve">
     <value>Use this size to control how many bytes a read from a file before processing</value>
-  </data>  
+  </data>
   <data name="AllowpassphrasechangeShort" xml:space="preserve">
     <value>Allow the passphrase to change</value>
   </data>
   <data name="AllowpassphrasechangeLong" xml:space="preserve">
     <value>Use this option to allow the passphrase to change, note that this option is not permitted for a backup or repair operation</value>
-  </data>  
+  </data>
+  <data name="FullblockverificationLong" xml:space="preserve">
+    <value>Verify encrypted blocks after they are downloaded</value>
+  </data>
+  <data name="FullblockverificationShort" xml:space="preserve">
+    <value>Verify encrypted blocks</value>
+  </data>
 </root>

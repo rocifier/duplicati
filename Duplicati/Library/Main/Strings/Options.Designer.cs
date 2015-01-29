@@ -709,6 +709,24 @@ namespace Duplicati.Library.Main.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Verify encrypted blocks after they are downloaded.
+        /// </summary>
+        internal static string FullblockverificationLong {
+            get {
+                return ResourceManager.GetString("FullblockverificationLong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Verify encrypted blocks.
+        /// </summary>
+        internal static string FullblockverificationShort {
+            get {
+                return ResourceManager.GetString("FullblockverificationShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to After a backup is completed, some files are selected for verification on the remote backend. Use this option to turn on full verification, which will decrypt the files and examine the insides of each volume, instead of simply verifying the external hash, If the option --{0} is set, no remote files are verified.
         /// </summary>
         internal static string FullremoteverificationLong {
