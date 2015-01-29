@@ -618,20 +618,12 @@ namespace Duplicati.Library.Main.Operation
                                         m_transaction.Commit();
                                     m_transaction = m_database.BeginTransaction();
 
-
-                                    using(new Logging.Timer("CommitUpdateRemoteVolume"))
-                                        m_transaction.Commit();
-                                    m_transaction = m_database.BeginTransaction();
-
                                     m_database.RemoveRemoteVolume(m_blockvolume.RemoteFilename, m_transaction);
                                     if (m_indexvolume != null)
                                         m_database.RemoveRemoteVolume(m_indexvolume.RemoteFilename, m_transaction);
                                 }
                             }
 
-                            using(new Logging.Timer("CommitUpdateRemoteVolume"))
-                                m_transaction.Commit();
-                            m_transaction = m_database.BeginTransaction();
                             using (new Logging.Timer("UpdateChangeStatistics"))
                                 m_database.UpdateChangeStatistics(m_result);
                             using (new Logging.Timer("VerifyConsistency"))
