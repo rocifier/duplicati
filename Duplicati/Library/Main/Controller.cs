@@ -52,7 +52,7 @@ namespace Duplicati.Library.Main
         private ITaskControl m_currentTask = null;
 
         private BackendManager m_currentBackendManager = null;
-        private System.Threading.Thread m_currentBackendManagerThread = null;
+        //private System.Threading.Thread m_currentBackendManagerThread = null;
 
         /// <summary>
         /// The thread running the current task

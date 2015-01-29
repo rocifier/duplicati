@@ -65,7 +65,7 @@ namespace Duplicati.Library.Main
     
     internal interface ISetCommonOptions : ILogWriter
     {
-        bool VerboseOutput { set; }
+        new bool VerboseOutput { set; }
         bool VerboseErrors { set; }
         
         DateTime EndTime { set; }
