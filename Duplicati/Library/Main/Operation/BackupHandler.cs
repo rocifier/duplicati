@@ -818,7 +818,7 @@ namespace Duplicati.Library.Main.Operation
                     m_backend.FlushDbMessages(m_database, null);
                 }
 
-                DateTime lastwrite = new DateTime(0);
+                DateTime lastwrite = new DateTime(0, DateTimeKind.Utc);
                 try 
                 { 
                     lastwrite = m_snapshot.GetLastWriteTimeUtc(path); 
@@ -866,7 +866,7 @@ namespace Duplicati.Library.Main.Operation
                     }
     
                     m_result.AddVerboseMessage("Adding directory {0}", path);
-                    AddFolderToOutput(path, DateTime.UtcNow, metahash);
+                    AddFolderToOutput(path, lastwrite, metahash);
                     return true;
                 }
     
@@ -874,16 +874,23 @@ namespace Duplicati.Library.Main.Operation
                 
                 bool changed = false;
                 
-                // The time we scan
-                DateTime scantime = DateTime.UtcNow;
                 // Last scan time
-                DateTime oldScanned;
-                var oldId = m_database.GetFileEntry(path, out oldScanned);
+                DateTime oldModified;
+                long lastFileSize = -1;
+                var oldId = m_database.GetFileEntry(path, out oldModified, out lastFileSize);
 
-                long filestatsize = m_snapshot.GetFileSize(path);
-                if ((oldId < 0 || m_options.DisableFiletimeCheck || LocalDatabase.NormalizeDateTime(lastwrite) >= oldScanned) && (m_options.SkipFilesLargerThan == long.MaxValue || m_options.SkipFilesLargerThan == 0 || filestatsize < m_options.SkipFilesLargerThan))
+                long filestatsize = -1;
+                try { filestatsize = m_snapshot.GetFileSize(path); }
+                catch { }
+
+                var timestampChanged = lastwrite != oldModified || lastwrite.Ticks == 0 || oldModified.Ticks == 0;
+                var filesizeChanged = filestatsize < 0 || lastFileSize < 0 || filestatsize != lastFileSize;
+                var tooLargeFile = m_options.SkipFilesLargerThan != long.MaxValue && m_options.SkipFilesLargerThan != 0 && filestatsize >= 0 && filestatsize > m_options.SkipFilesLargerThan;
+
+                if ((oldId < 0 || m_options.DisableFiletimeCheck || timestampChanged || filesizeChanged) && !tooLargeFile)
                 {
-                    m_result.AddVerboseMessage("Checking file for changes {0}", path);
+                    m_result.AddVerboseMessage("Checking file for changes {0}, new: {1}, timestamp changed: {2}, size changed: {3}, {4} vs {5}", path, oldId <= 0, timestampChanged, filesizeChanged, lastwrite, oldModified);
+
                     m_result.OpenedFiles++;
                     
                     long filesize = 0;
@@ -990,13 +997,13 @@ namespace Duplicati.Library.Main.Operation
 					            	m_result.AddDryrunMessage(string.Format("Would add changed file {0}, size {1}", path, Library.Utility.Utility.FormatSizeString(filesize)));
                             }
 
-                            AddFileToOutput(path, filesize, scantime, metahashandsize, hashcollector, filekey, blocklisthashes);
+                            AddFileToOutput(path, filesize, lastwrite, metahashandsize, hashcollector, filekey, blocklisthashes);
                             changed = true;
                         }
                         else
                         {
-                            // When we write the file to output, update the scan time
-                            oldScanned = scantime;
+                            // When we write the file to output, update the last modified time
+                            oldModified = lastwrite;
                             m_result.AddVerboseMessage("File has not changed {0}", path);
                         }
                     }
@@ -1105,9 +1112,9 @@ namespace Duplicati.Library.Main.Operation
             return false;
         }
 
-        private void AddUnmodifiedFile(long oldId, DateTime scantime)
+        private void AddUnmodifiedFile(long oldId, DateTime lastModified)
         {
-            m_database.AddUnmodifiedFile(oldId, scantime, m_transaction);
+            m_database.AddUnmodifiedFile(oldId, lastModified, m_transaction);
         }
 
 
@@ -1120,7 +1127,7 @@ namespace Duplicati.Library.Main.Operation
         /// <param name="size">The size of the file</param>
         /// <param name="fragmentoffset">The offset into a fragment block where the last few bytes are stored</param>
         /// <param name="metadata">A lookup table with various metadata values describing the file</param>
-        private bool AddFolderToOutput(string filename, DateTime scantime, IMetahash meta)
+        private bool AddFolderToOutput(string filename, DateTime lastModified, IMetahash meta)
         {
             long metadataid;
             bool r = false;
@@ -1131,7 +1138,7 @@ namespace Duplicati.Library.Main.Operation
             r |= AddBlockToOutput(meta.Hash, meta.Blob, 0, (int)meta.Size, CompressionHint.Default, false);
             r |= m_database.AddMetadataset(meta.Hash, meta.Size, out metadataid, m_transaction);
 
-            m_database.AddDirectoryEntry(filename, metadataid, scantime, m_transaction);
+            m_database.AddDirectoryEntry(filename, metadataid, lastModified, m_transaction);
             return r;
         }
 
@@ -1144,7 +1151,7 @@ namespace Duplicati.Library.Main.Operation
         /// <param name="size">The size of the file</param>
         /// <param name="fragmentoffset">The offset into a fragment block where the last few bytes are stored</param>
         /// <param name="metadata">A lookup table with various metadata values describing the file</param>
-        private bool AddSymlinkToOutput(string filename, DateTime scantime, IMetahash meta)
+        private bool AddSymlinkToOutput(string filename, DateTime lastModified, IMetahash meta)
         {
             long metadataid;
             bool r = false;
@@ -1155,7 +1162,7 @@ namespace Duplicati.Library.Main.Operation
             r |= AddBlockToOutput(meta.Hash, meta.Blob, 0, (int)meta.Size, CompressionHint.Default, false);
             r |= m_database.AddMetadataset(meta.Hash, meta.Size, out metadataid, m_transaction);
 
-            m_database.AddSymlinkEntry(filename, metadataid, scantime, m_transaction);
+            m_database.AddSymlinkEntry(filename, metadataid, lastModified, m_transaction);
             return r;
         }
 
@@ -1168,7 +1175,7 @@ namespace Duplicati.Library.Main.Operation
         /// <param name="size">The size of the file</param>
         /// <param name="fragmentoffset">The offset into a fragment block where the last few bytes are stored</param>
         /// <param name="metadata">A lookup table with various metadata values describing the file</param>
-        private void AddFileToOutput(string filename, long size, DateTime scantime, IMetahash metadata, IEnumerable<string> hashlist, string filehash, IEnumerable<string> blocklisthashes)
+        private void AddFileToOutput(string filename, long size, DateTime lastmodified, IMetahash metadata, IEnumerable<string> hashlist, string filehash, IEnumerable<string> blocklisthashes)
         {
             long metadataid;
             long blocksetid;
@@ -1181,7 +1188,7 @@ namespace Duplicati.Library.Main.Operation
 
             m_database.AddBlockset(filehash, size, m_blocksize, hashlist, blocklisthashes, out blocksetid, m_transaction);
 
-            m_database.AddFile(filename, scantime, blocksetid, metadataid, m_transaction);
+            m_database.AddFile(filename, lastmodified, blocksetid, metadataid, m_transaction);
         }
 
 
