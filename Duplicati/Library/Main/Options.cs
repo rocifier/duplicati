@@ -360,9 +360,12 @@ namespace Duplicati.Library.Main
                     "version",
                     "allow-passphrase-change",
 <<<<<<< HEAD
+<<<<<<< HEAD
                     "no-local-db",
                     "no-local-blocks",
                     "full-block-verification"
+=======
+>>>>>>> parent of bbec2e8... Promoted the option --no-local-blocks to a normal option, so restores can be tested without fiddling with source data.
 =======
 >>>>>>> parent of bbec2e8... Promoted the option --no-local-blocks to a normal option, so restores can be tested without fiddling with source data.
                 };
@@ -501,8 +504,14 @@ namespace Duplicati.Library.Main
                     new CommandLineArgument("upload-verification-file", CommandLineArgument.ArgumentType.Boolean, Strings.Options.UploadverificationfileShort, Strings.Options.UploadverificationfileLong, "false"),
                     new CommandLineArgument("allow-passphrase-change", CommandLineArgument.ArgumentType.Boolean, Strings.Options.AllowpassphrasechangeShort, Strings.Options.AllowpassphrasechangeLong, "false"),
 <<<<<<< HEAD
+<<<<<<< HEAD
                     new CommandLineArgument("no-local-blocks", CommandLineArgument.ArgumentType.Boolean, Strings.Options.NolocalblocksShort, Strings.Options.NolocalblocksLong, "false"),
                     new CommandLineArgument("full-block-verification", CommandLineArgument.ArgumentType.Boolean, Strings.Options.FullblockverificationShort, Strings.Options.FullblockverificationLong, "false"),
+=======
+#if DEBUG
+                    new CommandLineArgument("no-local-blocks", CommandLineArgument.ArgumentType.Boolean, "Prevents using local blocks for restore", "", "false"),
+#endif
+>>>>>>> parent of bbec2e8... Promoted the option --no-local-blocks to a normal option, so restores can be tested without fiddling with source data.
 =======
 #if DEBUG
                     new CommandLineArgument("no-local-blocks", CommandLineArgument.ArgumentType.Boolean, "Prevents using local blocks for restore", "", "false"),
